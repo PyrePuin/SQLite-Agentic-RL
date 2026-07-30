@@ -321,9 +321,9 @@ BASE_MODEL=/path/to/Qwen2.5-Coder-3B-Instruct
 python sqlite_agent/scripts/sft/run_formal_sft_eval.py \
   --model "$BASE_MODEL" \
   --train-data data/sft/v3_real_json/sft_v3_real_json_5817.jsonl \
-  --mini-dev data/eval/sft_v2_json/hard_mini_dev_en.jsonl \
-  --fast-dev data/eval/sft_v2_json/fast_dev.jsonl \
-  --full-dev data/eval/sft_v2_json/full_dev.jsonl \
+  --mini-dev data/eval/mini_dev.jsonl \
+  --fast-dev data/eval/fast_dev.jsonl \
+  --full-dev data/eval/full_dev.jsonl \
   --output-dir checkpoints/qwen25_coder3b_sqlite_sft_v3_real_json_formal \
   --epochs 2 \
   --train-samples 5817 \
@@ -343,7 +343,7 @@ python sqlite_agent/scripts/sft/run_formal_sft_eval.py \
 python sqlite_agent/scripts/sft/evaluate_sft_v2_agent.py \
   --base-model "$BASE_MODEL" \
   --adapter checkpoints/qwen25_coder3b_sqlite_sft_v3_real_json_formal/checkpoint-600 \
-  --tasks data/eval/sft_v2_json/full_dev.jsonl \
+  --tasks data/eval/full_dev.jsonl \
   --output outputs/full_dev_checkpoint600.jsonl \
   --summary-output outputs/full_dev_checkpoint600.summary.json \
   --max-tool-steps 8 \
@@ -381,7 +381,7 @@ MEGATRON_CKPT=/path/to/qwen25-coder3b-sqlite-v3-torch-dist \
 LOAD_CKPT=/path/to/qwen25-coder3b-sqlite-v3-torch-dist \
 TRAIN_TASKS="$PWD/data/rl/formal_stage2_2048/train_tasks.jsonl" \
 VAL_TASKS="$PWD/data/rl/formal_stage2_2048/val_tasks.jsonl" \
-WORK_DIR="$PWD/data/rl/formal_stage2_2048/slime" \
+WORK_DIR="$PWD/outputs/rl/formal_stage2_2048/slime" \
 OUTPUT_DIR="$PWD/checkpoints/slime_rl_stage2" \
 NUM_ROLLOUT=512 \
 ROLLOUT_BATCH_SIZE=4 \

@@ -92,9 +92,9 @@ python3 sqlite_agent/scripts/archive/sft/build_mixed_sft.py \
 python sqlite_agent/scripts/sft/run_formal_sft_eval.py \
   --model /path/to/Qwen2.5-Coder-3B-Instruct \
   --train-data data/sft/v3_real_json/sft_v3_real_json_5817.jsonl \
-  --mini-dev data/eval/sft_v2_json/hard_mini_dev_en.jsonl \
-  --fast-dev data/eval/sft_v2_json/fast_dev.jsonl \
-  --full-dev data/eval/sft_v2_json/full_dev.jsonl \
+  --mini-dev data/eval/mini_dev.jsonl \
+  --fast-dev data/eval/fast_dev.jsonl \
+  --full-dev data/eval/full_dev.jsonl \
   --output-dir checkpoints/qwen25_coder3b_sqlite_sft_v3_real_json_formal \
   --epochs 2 \
   --train-samples 5817 \

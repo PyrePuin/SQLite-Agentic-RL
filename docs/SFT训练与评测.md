@@ -13,9 +13,9 @@ export PYTHONPATH="$PWD/sqlite_agent:${PYTHONPATH:-}"
 
 ```text
 train:     data/sft/v3_real_json/sft_v3_real_json_5817.jsonl
-mini-dev:  data/eval/sft_v2_json/hard_mini_dev_en.jsonl
-fast-dev:  data/eval/sft_v2_json/fast_dev.jsonl
-full-dev:  data/eval/sft_v2_json/full_dev.jsonl
+mini-dev:  data/eval/mini_dev.jsonl
+fast-dev:  data/eval/fast_dev.jsonl
+full-dev:  data/eval/full_dev.jsonl
 model:     Qwen2.5-Coder-3B-Instruct
 protocol:  json_v2
 ```
@@ -37,9 +37,9 @@ BASE_MODEL=/path/to/Qwen2.5-Coder-3B-Instruct
 python sqlite_agent/scripts/sft/run_formal_sft_eval.py \
   --model "$BASE_MODEL" \
   --train-data data/sft/v3_real_json/sft_v3_real_json_5817.jsonl \
-  --mini-dev data/eval/sft_v2_json/hard_mini_dev_en.jsonl \
-  --fast-dev data/eval/sft_v2_json/fast_dev.jsonl \
-  --full-dev data/eval/sft_v2_json/full_dev.jsonl \
+  --mini-dev data/eval/mini_dev.jsonl \
+  --fast-dev data/eval/fast_dev.jsonl \
+  --full-dev data/eval/full_dev.jsonl \
   --output-dir checkpoints/qwen25_coder3b_sqlite_sft_v3_real_json_formal \
   --epochs 2 \
   --train-samples 5817 \
@@ -65,7 +65,7 @@ Training and evaluation remain separate entrypoints. To evaluate one adapter:
 python sqlite_agent/scripts/sft/evaluate_sft_v2_agent.py \
   --base-model "$BASE_MODEL" \
   --adapter checkpoints/qwen25_coder3b_sqlite_sft_v3_real_json_formal/checkpoint-600 \
-  --tasks data/eval/sft_v2_json/full_dev.jsonl \
+  --tasks data/eval/full_dev.jsonl \
   --output outputs/full_dev_checkpoint600.jsonl \
   --summary-output outputs/full_dev_checkpoint600.summary.json \
   --max-tool-steps 8 \

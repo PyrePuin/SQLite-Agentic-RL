@@ -11,7 +11,16 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 
 from sqlite_agent_pkg.compat.xml_v1 import parse_final, parse_tool_call, parse_tool_result
-from sqlite_agent_pkg.agent.protocol import system_message
+
+
+FROZEN_SYSTEM_PROMPT_PATH = (
+    ROOT.parent / "data/sft/v3_real_json/system_prompt_20260706.txt"
+)
+
+
+def frozen_system_message() -> dict[str, str]:
+    content = FROZEN_SYSTEM_PROMPT_PATH.read_text(encoding="utf-8").rstrip("\n")
+    return {"role": "system", "content": content}
 
 
 def read_jsonl(path: Path) -> list[dict[str, Any]]:
@@ -78,7 +87,7 @@ def convert_rollout(row: dict[str, Any]) -> tuple[dict[str, Any] | None, str]:
         role = str(message.get("role"))
         content = str(message.get("content", ""))
         if role == "system":
-            converted.append(system_message("json_v2"))
+            converted.append(frozen_system_message())
         elif role == "user":
             converted.append({"role": "user", "content": normalize_user(content)})
         elif role == "assistant":
@@ -128,6 +137,8 @@ def main() -> None:
     manifest = {
         "input": args.input,
         "output": args.output,
+        "system_prompt": str(FROZEN_SYSTEM_PROMPT_PATH.relative_to(ROOT.parent)),
+        "system_prompt_version": "2026-07-06",
         "input_rows": len(rows),
         "output_rows": len(converted),
         "reason_counts": dict(sorted(reasons.items())),

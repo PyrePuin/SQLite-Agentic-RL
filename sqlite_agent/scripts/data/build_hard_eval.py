@@ -68,10 +68,11 @@ def has_feature(row: dict[str, Any], feature: str) -> bool:
 def main() -> None:
     parser = argparse.ArgumentParser(description="Build a harder DB-level eval slice from V2 task splits.")
     parser.add_argument("--input", default="data/splits/v2_db_seed42/dev.jsonl")
-    parser.add_argument("--output", default="data/eval/sft_v2_json/hard_dev.jsonl")
-    parser.add_argument("--target", type=int, default=160)
-    parser.add_argument("--max-per-db", type=int, default=6)
-    parser.add_argument("--language-mode", choices=["prefer_en", "en_only", "zh_only"], default="prefer_en")
+    parser.add_argument("--output", default="data/eval/mini_dev.jsonl")
+    parser.add_argument("--manifest", help="Optional standalone manifest output; omitted for the consolidated data/eval manifest.")
+    parser.add_argument("--target", type=int, default=120)
+    parser.add_argument("--max-per-db", type=int, default=5)
+    parser.add_argument("--language-mode", choices=["prefer_en", "en_only", "zh_only"], default="en_only")
     parser.add_argument("--seed", type=int, default=42)
     args = parser.parse_args()
 
@@ -128,10 +129,13 @@ def main() -> None:
         "language_mode": args.language_mode,
         "feature_counts": dict(sorted(feature_counts.items())),
     }
-    Path(args.output).with_suffix(".manifest.json").write_text(
-        json.dumps(manifest, ensure_ascii=False, indent=2) + "\n",
-        encoding="utf-8",
-    )
+    if args.manifest:
+        manifest_path = Path(args.manifest)
+        manifest_path.parent.mkdir(parents=True, exist_ok=True)
+        manifest_path.write_text(
+            json.dumps(manifest, ensure_ascii=False, indent=2) + "\n",
+            encoding="utf-8",
+        )
     print(json.dumps(manifest, ensure_ascii=False, indent=2))
 
 

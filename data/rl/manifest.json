@@ -7,7 +7,7 @@
     "max_empty": 0.12
   },
   "train_source": "data/splits/v2_db_seed42/train.jsonl",
-  "val_source": "data/eval/sft_v2_json/hard_mini_dev_en.jsonl",
+  "val_source": "data/eval/mini_dev.jsonl",
   "train": {
     "tasks": 768,
     "db_count": 91,
@@ -152,7 +152,7 @@
     }
   },
   "outputs": {
-    "train_tasks": "data/rl/smoke_v1_768/train_tasks.jsonl",
-    "val_tasks": "data/rl/smoke_v1_768/val_tasks.jsonl"
+    "train_tasks": "data/rl/train_tasks.jsonl",
+    "val_tasks": "data/rl/val_tasks.jsonl"
   }
 }

@@ -170,7 +170,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Build V3 augmented JSON SFT data from V2 plus targeted hard behavior samples.")
     parser.add_argument("--base", default="data/sft/v2_json/sft_v2_json_5486.jsonl")
     parser.add_argument("--train", default="data/splits/v2_db_seed42/train.jsonl")
-    parser.add_argument("--output-dir", default="data/sft/v3_json")
+    parser.add_argument("--output-dir", default="outputs/sft/v3_json_ablation")
     parser.add_argument("--hard-agent", type=int, default=380)
     parser.add_argument("--literal", type=int, default=220)
     parser.add_argument("--final-anchor", type=int, default=180)

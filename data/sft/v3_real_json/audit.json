@@ -3,8 +3,11 @@
   "created_at": "2026-07-06",
   "description": "V3-real SFT train set = V2 JSON base plus verified English hard teacher agent rollouts.",
   "base_file": "data/sft/v2_json/sft_v2_json_5486.jsonl",
-  "teacher_real_file": "data/sft/v3_json/teacher_real_hard_en_pass_all_20260706.jsonl",
   "teacher_rollout_source": "data/teacher_rollouts/hard_teacher_v4pro_en_all_dedup_20260706.jsonl",
+  "teacher_conversion_script": "sqlite_agent/scripts/sft/build_sft_from_teacher_rollouts.py",
+  "teacher_system_prompt": "data/sft/v3_real_json/system_prompt_20260706.txt",
+  "teacher_system_prompt_file_sha256": "d45156d63c5f12d7be2013d801e91399512308573df4e6d34664473614f6255b",
+  "teacher_system_prompt_content_sha256": "6d5f6720aa9c28b77b61726cf96668905390e3fcb00445fa743cac191918fa8b",
   "output_file": "data/sft/v3_real_json/sft_v3_real_json_5817.jsonl",
   "rows": 5817,
   "base_rows": 5486,
@@ -69,6 +72,7 @@
   ],
   "notes": [
     "All teacher_agent_real_v3 rows are real DeepSeek teacher agent rollouts through the SQLite tool environment and verifier-successful.",
-    "Mechanical v3_json augmentation is bootstrap/ablation only and is not included."
+    "The 331 verified teacher rows are already included in output_file; the reproducible intermediate conversion file is not retained.",
+    "Mechanical trajectory augmentation is bootstrap/ablation only and is not included."
   ]
 }

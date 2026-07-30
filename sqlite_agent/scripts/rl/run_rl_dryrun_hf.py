@@ -243,7 +243,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="No-update RL dry-run for checkpoint-600 policy.")
     parser.add_argument("--base-model", required=True)
     parser.add_argument("--adapter", required=True)
-    parser.add_argument("--tasks", default="data/rl/smoke_v1_768/train_tasks.jsonl")
+    parser.add_argument("--tasks", default="data/rl/train_tasks.jsonl")
     parser.add_argument("--output", default="logs/rl/dryrun_rollouts.jsonl")
     parser.add_argument("--summary-output", default="logs/rl/dryrun_summary.json")
     parser.add_argument("--limit", type=int, default=100)
