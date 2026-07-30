@@ -1,4 +1,4 @@
-# SQLite-Agentic-RL-V2
+# SQLite-Agentic-RL
 
 在可执行、可验证的 SQLite 环境中，用 SFT + GRPO 训练 3B 模型学习多轮工具调用。
 
@@ -28,19 +28,19 @@ SQLite 提供了一个成本较低但足够完整的研究环境：
 
 ```mermaid
 flowchart LR
-    A["Spider / CSpider<br/>SQLite Databases"] --> B["Task Pool<br/>Gold Execution Cache"]
-    B --> C["DB-level Split<br/>Train / Dev / Final Eval"]
-    C --> D["DeepSeek Teacher<br/>Real Agent Rollout"]
-    D --> E["Verifier + Audit<br/>620 -> 331 Traces"]
-    B --> F["SQL Core / Protocol / Repair"]
-    E --> G["V3 SFT Dataset<br/>5,817 Samples"]
+    A["Spider / CSpider<br/>SQLite 数据库"] --> B["任务池<br/>Gold 执行缓存"]
+    B --> C["数据库级划分<br/>训练 / 开发 / 最终评测"]
+    C --> D["DeepSeek Teacher<br/>真实 Agent 轨迹"]
+    D --> E["验证器与审计<br/>620 -> 331 条轨迹"]
+    B --> F["SQL 核心 / 协议 / 修复"]
+    E --> G["V3 SFT 数据集<br/>5,817 条样本"]
     F --> G
     G --> H["Qwen2.5-Coder-3B<br/>LoRA SFT"]
-    H --> I["Agent Evaluation<br/>Execution Metrics"]
-    H --> J["Slime GRPO<br/>2,048 Prompts x 4"]
-    J --> K["SQLite Reward<br/>8,192 Trajectories"]
+    H --> I["Agent 评测<br/>执行指标"]
+    H --> J["Slime GRPO<br/>2,048 个提示 × 4"]
+    J --> K["SQLite 奖励<br/>8,192 条轨迹"]
     K --> J
-    J --> L["Best RL Validation<br/>Strict 73.3% / Equiv 78.3%"]
+    J --> L["最佳 RL 验证结果<br/>严格 73.3% / 等价 78.3%"]
 ```
 
 ---
@@ -51,12 +51,12 @@ flowchart LR
 |---|---:|
 | 基座模型 | Qwen2.5-Coder-3B-Instruct |
 | 正式 SFT 数据 | 5,817 条，纯 JSON Agent 协议 |
-| 真实 Teacher 采集 | 620 条去重 rollout，筛出 331 条 verifier-successful trace |
-| SFT full-dev | 300 tasks，strict-or-equivalent 66.3%，SQL executable 94.3% |
-| 正式 RL 数据 | 2,048 prompts，10% simple / 45% medium / 45% hard |
-| GRPO 采样规模 | group size 4，共约 8,192 trajectories |
-| 最佳 RL validation | reward 0.8163，strict 73.3%，equivalent 78.3% |
-| Agent 稳定性 | submitted 100%，executable 95%，protocol valid 100%，parse failed 0% |
+| 真实 Teacher 采集 | 620 条去重轨迹，筛出 331 条通过验证的轨迹 |
+| SFT 完整开发集 | 300 个任务，严格或等价正确率 66.3%，SQL 可执行率 94.3% |
+| 正式 RL 数据 | 2,048 个提示，10% 简单 / 45% 中等 / 45% 困难 |
+| GRPO 采样规模 | 每组 4 条，共约 8,192 条轨迹 |
+| 最佳 RL 验证结果 | 奖励 0.8163，严格正确率 73.3%，等价正确率 78.3% |
+| Agent 稳定性 | 提交率 100%，可执行率 95%，协议有效率 100%，解析失败率 0% |
 
 SFT 的 `full-dev` 与 GRPO 的 120-task validation 并非同一评测集合，不能直接视为严格的前后对比。GRPO 在同一份 RL validation 上，从 rollout 49 的 `strict 50.8% / equivalent 60.0%` 提升到 rollout 349 的 `strict 73.3% / equivalent 78.3%`。
 
@@ -68,14 +68,14 @@ SFT 的 `full-dev` 与 GRPO 的 120-task validation 并非同一评测集合，�
 
 Agent 只能通过以下工具读取数据库：
 
-| Tool | 作用 |
+| 工具 | 作用 |
 |---|---|
 | `list_tables` | 获取数据库中的表名 |
 | `get_schema` | 查询列、类型、主键和外键 |
 | `preview_rows` | 仅在需要确认枚举值、文本值或日期格式时查看样例 |
 | `execute_sql` | 执行单条只读 `SELECT` / `WITH` SQL |
 
-Assistant 每轮只能输出一个 JSON 对象。
+模型每轮只能输出一个 JSON 对象。
 
 ```json
 {"type":"tool_call","name":"get_schema","arguments":{"table_names":["orders","customers"]}}
@@ -91,18 +91,20 @@ Assistant 每轮只能输出一个 JSON 对象。
 
 ### 真实轨迹
 
-Normal Agent Trace 不是机械拼接的固定工具链。Teacher 在真实 SQLite 环境中自行决定：
+正常 Agent 轨迹不是机械拼接的固定工具链。Teacher 在真实 SQLite 环境中自行决定：
 
 ```text
-question
+问题
 -> list_tables / get_schema
--> optional preview_rows
+-> 按需 preview_rows
 -> execute_sql
--> error feedback / result observation
--> repair or final
+-> 错误反馈 / 结果观察
+-> 修复或结束
 ```
 
-Teacher smoke 还暴露了两类需要分离的问题：模型的 literal grounding 错误，以及 question / gold SQL 本身不一致的可疑标签。项目通过 strict verifier + LLM audit 将它们分桶，避免把错标样本作为负向 repair 数据。
+Teacher 冒烟测试还暴露了两类需要分离的问题：模型的字面值定位错误，
+以及问题与 Gold SQL 本身不一致的可疑标签。项目通过严格验证器和 LLM
+审计将它们分桶，避免把错标样本作为负向修复数据。
 
 ---
 
@@ -122,11 +124,11 @@ data/sft/v3_real_json/sft_v3_real_json_5817.jsonl
 | `sql_core` | 1,100 | 稳定基础 SQL 能力 |
 | `agent_trace` | 876 | 多轮工具使用行为 |
 | `schema_only` | 714 | schema 理解与动作选择 |
-| `protocol_anchor` | 500 | 固定 canonical JSON 输出协议 |
-| `repair_real` | 251 | 来自真实执行失败的修复 transition |
+| `protocol_anchor` | 500 | 固定标准 JSON 输出协议 |
+| `repair_real` | 251 | 来自真实执行失败的修复过程 |
 | `teacher_agent_real_v3` | 331 | DeepSeek V4 Pro 真实环境成功轨迹 |
 
-全部 assistant target 已统一为 `json_v2`：
+全部模型监督目标已统一为 `json_v2`：
 
 ```text
 assistant XML tags:       0
@@ -134,7 +136,7 @@ assistant schema errors:  0
 invalid tool names:       0
 ```
 
-### Teacher provenance
+### Teacher 数据来源
 
 仓库只保留最小可追溯链：
 
@@ -147,7 +149,9 @@ hard_train_pool_en_large_20260706.jsonl
 
 ### 数据划分
 
-Train、Dev 与 Final Eval 按完整 `db_id` 划分，而不是随机拆问题，避免同一 schema 同时进入训练和验证。Spider/CSpider 在进入任务池后按 `(db_id, normalized_gold_sql)` 去重。
+训练集、开发集与最终评测集按完整 `db_id` 划分，而不是随机拆分问题，
+避免同一 schema 同时进入训练和验证。Spider/CSpider 在进入任务池后按
+`(db_id, normalized_gold_sql)` 去重。
 
 ---
 
@@ -171,15 +175,15 @@ gradient checkpointing: enabled
 
 训练器在固定 optimizer step 保存 checkpoint，并在同一全局 step 轴记录训练和 Agent rollout 指标。正式选择的 `checkpoint-600` 在 300-task full-dev 上得到：
 
-| Metric | Result |
+| 指标 | 结果 |
 |---|---:|
-| strict-or-equivalent pass | 66.33% |
-| strict pass | 44.00% |
-| canonical protocol valid | 90.33% |
-| finalization | 94.33% |
-| SQL executable | 94.33% |
-| parse failed | 2.67% |
-| budget exceeded | 3.00% |
+| 严格或等价正确率 | 66.33% |
+| 严格正确率 | 44.00% |
+| 标准协议有效率 | 90.33% |
+| 正常结束率 | 94.33% |
+| SQL 可执行率 | 94.33% |
+| 解析失败率 | 2.67% |
+| 超出步数比例 | 3.00% |
 
 主要剩余错误已经从协议失败转为“SQL 可以执行，但语义或结果错误”，适合作为 RL 阶段的优化对象。
 
@@ -187,18 +191,19 @@ gradient checkpointing: enabled
 
 ## GRPO 与奖励
 
-Reward 由 SQLite 执行结果直接计算，正确性是主要信号，协议和轨迹行为作为约束项。
+奖励由 SQLite 执行结果直接计算，正确性是主要信号，协议和轨迹行为作为
+约束项。
 
-| 条件 | Reward / Penalty |
+| 条件 | 奖励 / 惩罚 |
 |---|---:|
-| value-equivalent output | `+1.00` |
-| executable but wrong | `+0.20` |
-| submitted but not executable | `+0.05` |
-| parse failed | `-0.30` |
-| protocol invalid | `-0.20` |
-| budget exceeded | `-0.10` |
-| unsafe SQL | `-1.00` |
-| tool steps above 6 | `-0.02 / step` |
+| 输出结果等价 | `+1.00` |
+| SQL 可执行但结果错误 | `+0.20` |
+| 已提交但不可执行 | `+0.05` |
+| 解析失败 | `-0.30` |
+| 协议无效 | `-0.20` |
+| 超出步数预算 | `-0.10` |
+| 不安全 SQL | `-1.00` |
+| 超过 6 次工具调用 | 每步 `-0.02` |
 
 正式 Stage 2 配置：
 
@@ -216,9 +221,9 @@ tensor parallel:        2
 optimizer CPU offload:  enabled
 ```
 
-### Validation curve
+### 验证曲线
 
-| Rollout | Avg Reward | Strict | Equivalent | Executable | Protocol | Budget Exceeded |
+| 轨迹轮次 | 平均奖励 | 严格正确 | 结果等价 | 可执行 | 协议有效 | 超出步数 |
 |---:|---:|---:|---:|---:|---:|---:|
 | 49 | 0.6275 | 50.8% | 60.0% | 90.0% | 99.2% | 9.2% |
 | 99 | 0.7196 | 62.5% | 70.0% | 95.0% | 100.0% | 4.2% |
@@ -249,27 +254,27 @@ optimizer CPU offload:  enabled
 ## 项目结构
 
 ```text
-SQLite-Agentic-RL-V2/
+SQLite-Agentic-RL/
 ├── data/
-│   ├── raw/                    # Spider/CSpider 原始任务与 SQLite DB
-│   ├── pool/                   # 去重任务池与 gold execution cache
-│   ├── splits/                 # DB-level train/dev/final_eval
-│   ├── sft/                    # V2 base、V3 real 正式 SFT 数据
-│   ├── eval/                   # mini/fast/full/hard validation
-│   ├── teacher_rollouts/       # 最终 Teacher provenance
-│   └── rl/                     # 可复现 smoke；formal Stage 2 可重新构建
+│   ├── raw/                    # Spider/CSpider 原始任务与 SQLite 数据库
+│   ├── pool/                   # 去重任务池与 Gold 执行缓存
+│   ├── splits/                 # 数据库级训练/开发/最终评测划分
+│   ├── sft/                    # V2 基础版、V3 真实轨迹版 SFT 数据
+│   ├── eval/                   # 小型/快速/完整/困难验证集
+│   ├── teacher_rollouts/       # 最终 Teacher 数据来源
+│   └── rl/                     # 可复现冒烟数据；正式第二阶段可重新构建
 ├── sqlite_agent/
 │   ├── sqlite_agent_pkg/
-│   │   ├── agent/              # JSON protocol 与 parser
+│   │   ├── agent/              # JSON 协议与解析器
 │   │   ├── compat/             # 仅供历史数据迁移的 XML V1 兼容层
-│   │   ├── data/               # Task schema
-│   │   ├── env/                # SQLite tools、SQL guard、verifier
-│   │   └── rl/                 # Reward、Slime agent、metrics
+│   │   ├── data/               # 任务数据结构
+│   │   ├── env/                # SQLite 工具、SQL 安全检查、验证器
+│   │   └── rl/                 # 奖励、Slime Agent、指标
 │   └── scripts/
-│       ├── data/               # 归一化、任务池、gold cache、DB split
-│       ├── env/                # 环境 smoke
+│       ├── data/               # 归一化、任务池、Gold 缓存、数据库划分
+│       ├── env/                # 环境冒烟测试
 │       ├── sft/                # 数据构造、Teacher rollout、SFT、评测
-│       ├── rl/                 # RL 数据、LoRA merge、Slime launcher
+│       ├── rl/                 # RL 数据、LoRA 合并、Slime 启动器
 │       └── archive/            # 历史构造器与消融脚本
 ├── artifacts/                  # 权重交付说明；模型文件不进入 Git
 └── docs/                       # 训练记录、错误分析与实验演变
@@ -292,7 +297,7 @@ PyTorch 2.5.1
 核心环境和测试可通过 `pyproject.toml` 安装；SFT 使用可选依赖。GRPO 额外依赖 Slime、Megatron-LM、SGLang 和 Ray，应遵循 Slime 对应版本的环境安装方式。
 
 ```bash
-cd SQLite-Agentic-RL-V2
+cd SQLite-Agentic-RL
 python -m pip install -e '.[dev]'
 export PYTHONPATH="$PWD/sqlite_agent:${PYTHONPATH:-}"
 ```
@@ -400,7 +405,7 @@ bash sqlite_agent/scripts/rl/run_slime_rl_smoke.sh
 
 ## 评测指标
 
-| Metric | 含义 |
+| 指标 | 含义 |
 |---|---|
 | `strict_pass_rate` | 输出列与结果值均严格一致 |
 | `equivalent_output_rate` | 结果值等价，允许列别名等非语义差异 |

@@ -1,33 +1,32 @@
-# Raw Datasets
+# 原始数据集
 
-This directory is the expected local location for benchmark source files and
-SQLite databases before SFT/RL processing. Raw downloads are intentionally not
-tracked because of their size and upstream licenses.
+该目录用于在本地存放 SFT/RL 处理前的 benchmark 源文件和 SQLite
+数据库。由于体积较大且受到上游许可证约束，原始下载内容不进入 Git。
 
 ## Spider
 
-Expected normalized Spider layout:
+归一化后的 Spider 目录结构：
 
-- `spider/source_all_tasks.jsonl`: source task file.
-- `spider/database/`: SQLite database files.
-- `spider/tasks_all.jsonl`: normalized V2 task file with local V2 `db_path` values.
-- `spider/manifest_all.json`: normalization manifest.
+- `spider/source_all_tasks.jsonl`：源任务文件
+- `spider/database/`：SQLite 数据库文件
+- `spider/tasks_all.jsonl`：归一化后的 V2 任务文件，包含本地 `db_path`
+- `spider/manifest_all.json`：归一化清单
 
-Scale:
+当前规模：
 
-- 7000 tasks.
-- 140 databases.
-- database directory is about 875 MB.
+- 7,000 条任务
+- 140 个数据库
+- 数据库目录约 875 MB
 
 ## CSpider
 
-Put downloaded CSpider files under:
+将下载后的 CSpider 文件放在：
 
 ```text
 data/raw/cspider/source/
 ```
 
-Expected raw files are usually similar to:
+常见的原始文件结构为：
 
 ```text
 train.json
@@ -36,7 +35,7 @@ tables.json
 database/
 ```
 
-After files are available, normalize with:
+文件准备完成后执行归一化：
 
 ```bash
 python sqlite_agent/scripts/data/normalize_raw_datasets.py \
@@ -47,11 +46,12 @@ python sqlite_agent/scripts/data/normalize_raw_datasets.py \
   --split train
 ```
 
-If CSpider reuses Spider database files rather than shipping its own database directory, use `--db-root data/raw/spider/database`.
+如果 CSpider 复用 Spider 的数据库文件而不单独提供数据库目录，请使用
+`--db-root data/raw/spider/database`。
 
-## Canonical Task Schema
+## 标准任务结构
 
-Each normalized row should contain:
+每条归一化数据应包含：
 
 ```json
 {

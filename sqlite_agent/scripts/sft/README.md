@@ -1,54 +1,61 @@
-# SFT Scripts
+# SFT 脚本
 
-SFT data is derived from the task truth pool, not directly from raw Spider/CSpider files.
+SFT 数据从任务真值池构造，而不是直接读取原始 Spider/CSpider 文件。
 
-## Current Agent Protocol
+## 当前 Agent 协议
 
-Agent trace rows use pure JSON message contents, not XML/HTML-style tag wrappers.
+Agent 轨迹使用纯 JSON message content，不再使用 XML/HTML 风格标签。
 
-- Assistant tool call: `{"type":"tool_call","name":"execute_sql","arguments":{"sql":"SELECT ..."}}`
-- User tool result: `{"type":"tool_result","result":{"ok":true,...}}`
-- Assistant final: `{"type":"final","final_sql":"SELECT ...","answer":"..."}`
+- Assistant 工具调用：
+  `{"type":"tool_call","name":"execute_sql","arguments":{"sql":"SELECT ..."}}`
+- User 工具结果：
+  `{"type":"tool_result","result":{"ok":true,...}}`
+- Assistant 最终输出：
+  `{"type":"final","final_sql":"SELECT ...","answer":"..."}`
 
-`sql_core` rows are a separate direct-SQL mode: the assistant content is the SQL string itself.
+`sql_core` 是独立的直接 SQL 模式：assistant content 就是 SQL 字符串。
 
-Current builders:
+当前构造器：
 
-- `build_sql_core.py`: builds direct SQL samples from split task files. This is deterministic and does not require a teacher model.
-- `collect_teacher_rollouts.py`: runs a real teacher model through the SQLite environment and records success/fail transcripts for later SFT and repair extraction.
-- `judge_rollout_audit.py`: audits strict-fail rollout rows with an LLM judge and separates likely label mismatches from true model errors.
-- `build_rollout_buckets.py`: merges rollout rows and audit rows into retained buckets:
+- `build_sql_core.py`：从划分任务构造确定性的直接 SQL 样本，不需要
+  Teacher 模型
+- `collect_teacher_rollouts.py`：让真实 Teacher 模型在 SQLite 环境中
+  rollout，记录成功和失败轨迹，用于后续 SFT 与 repair 提取
+- `judge_rollout_audit.py`：用 LLM judge 审计严格验证失败的轨迹，区分
+  可疑标签不一致和真实模型错误
+- `build_rollout_buckets.py`：合并 rollout 与审计结果，生成：
   - `strict_pass`
   - `strict_fail_true_error`
   - `strict_fail_suspect_label_mismatch`
   - `strict_fail_uncertain`
-- `build_sft_from_teacher_rollouts.py`: converts retained teacher traces into normalized SFT rows. Its XML reader comes from the isolated compatibility module because some historical source traces predate `json_v2`.
+- `build_sft_from_teacher_rollouts.py`：把保留的 Teacher 轨迹转换为标准
+  SFT 数据。由于部分历史来源早于 `json_v2`，其 XML 读取逻辑来自隔离的
+  兼容模块
 
-Do not mechanically expand every task into `list_tables -> get_schema -> execute_sql(gold_sql)` as the main agent dataset. That creates brittle imitation of a fixed path instead of real agent behavior.
+不要把每条任务机械展开为
+`list_tables -> get_schema -> execute_sql(gold_sql)` 并作为主要 Agent
+数据。这会让模型模仿固定路径，而不是根据真实环境选择动作。
 
-## Historical Bootstrap Mix
+## 历史冷启动混合数据
 
-The earlier pre-teacher bootstrap used the following approximation. It is not
-the current formal V3 training set and its generated files were removed during
-the 2026-07-10 cleanup.
+Teacher 轨迹引入前曾使用以下近似比例。这不是当前正式 V3 训练集，相关
+生成产物已在 2026-07-10 清理。
 
-Recommended row mix for the current phase:
+当时建议的数据比例：
 
-- about `55%` `sql_core`
-- about `25%` `tool_trace_bootstrap`
-- about `20%` `repair_missing_table`
+- 约 `55%` `sql_core`
+- 约 `25%` `tool_trace_bootstrap`
+- 约 `20%` `repair_missing_table`
 
-With the default script rates on top of one base `sql_core` row per task:
+在每条基础 `sql_core` 数据之上使用：
 
 - `tool_trace_rate = 0.45`
 - `repair_rate = 0.35`
 
-The resulting blended row share is usually close to the 55 / 25 / 20 target.
+最终混合比例通常接近 55 / 25 / 20。
 
-The deterministic bootstrap, XML migration, English-only composition, and
-mechanical V3 augmentation builders are retained under
-`sqlite_agent/scripts/archive/sft/` for provenance. Rebuild them only for an
-explicit historical ablation.
+确定性冷启动、XML 迁移、仅英文构造和机械 V3 增强脚本保存在
+`sqlite_agent/scripts/archive/sft/` 中，仅在明确复现历史消融时使用。
 
 ```bash
 python3 sqlite_agent/scripts/archive/sft/build_mixed_sft.py \
@@ -58,21 +65,28 @@ python3 sqlite_agent/scripts/archive/sft/build_mixed_sft.py \
   --manifest data/sft/train_v2_mixed.manifest.json
 ```
 
-## Formal V3 Workflow
+## 正式 V3 流程
 
-Use separate scripts for formal runs:
+正式运行使用相互独立的脚本：
 
-1. `train_sft_v2_lora.py`: continuous SFT training only. It owns the full LR schedule and must be run with the final `--max-steps` from the beginning, or resumed from a Trainer checkpoint.
-2. `evaluate_sft_v2_agent.py`: rollout evaluation only for one explicit checkpoint/adapter and one explicit eval set.
-3. `cleanup_sft_run.py`: post-run cleanup after final eval, keeping only selected checkpoints and summaries.
+1. `train_sft_v2_lora.py`：只负责连续 SFT 训练。首次启动时必须使用最终
+   `--max-steps`，或者从 Trainer checkpoint 恢复，以保持完整学习率曲线。
+2. `evaluate_sft_v2_agent.py`：只评测一个明确的 checkpoint/adapter 和
+   一个明确的评测集。
+3. `cleanup_sft_run.py`：在最终评测后清理训练目录，只保留选中的
+   checkpoint 和结果摘要。
 
-The old `run_sft_v2_segmented.py` runner has been deleted because it could reset LR scheduling around validation boundaries.
+旧的 `run_sft_v2_segmented.py` 已删除，因为它可能在验证边界重置学习率
+调度状态。
 
-### Formal train/eval scheduler
+### 正式训练与评测调度器
 
-`run_formal_sft_eval.py` is the formal orchestrator. It keeps `--max-steps` equal to the full run length on every training call and uses `--stop-at-step` to pause for validation. This preserves Trainer optimizer and LR scheduler state while still evaluating at fixed checkpoints.
+`run_formal_sft_eval.py` 是正式编排入口。每次训练调用都保持完整的
+`--max-steps`，通过 `--stop-at-step` 在固定位置暂停并执行验证。这样既能
+保留 Trainer 的 optimizer 和学习率调度器状态，又能在固定 checkpoint
+进行 Agent 评测。
 
-Example shape:
+命令示例：
 
 ```bash
 python sqlite_agent/scripts/sft/run_formal_sft_eval.py \

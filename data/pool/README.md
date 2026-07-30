@@ -1,67 +1,70 @@
-# Unified Task Pool
+# 统一任务池
 
-This directory is the bridge between raw datasets and training/evaluation data.
+该目录连接原始数据和训练/评测数据。
 
-The pool merges Spider and CSpider into deduplicated bottom-level SQL tasks. Spider and CSpider often contain the same task in English and Chinese, so the pool is deduplicated by:
+任务池将 Spider 与 CSpider 合并成去重后的底层 SQL 任务。两套数据经常
+包含同一任务的中英文版本，因此使用以下键去重：
 
 ```text
 (db_id, normalized_gold_sql)
 ```
 
-## Main File To Use
+## 下游正式输入
 
-Use this file for the next stage:
+后续阶段使用：
 
 ```text
 task_pool.filtered.jsonl
 ```
 
-It contains tasks whose gold SQL was executed successfully and passed first-stage filters.
+其中只包含 Gold SQL 已成功执行并通过第一阶段过滤的任务。
 
-Current scale:
+当前规模：
 
-- filtered tasks: 7586
-- DBs: 206
-- paired English/Chinese tasks: 2759
-- Chinese-only tasks: 3641
-- English-only tasks: 1186
+- 过滤后任务：7,586 条
+- 数据库：206 个
+- 中英文配对任务：2,759 条
+- 仅中文任务：3,641 条
+- 仅英文任务：1,186 条
 
-Filtering rules used in the current build:
+当前过滤规则：
 
-- SQL must be readonly `SELECT` / `WITH`.
-- gold SQL must execute successfully in local SQLite.
-- result row count must be `<= 500`.
-- SQL length must be `<= 1200`.
-- execution time must be `<= 5.0` seconds.
+- SQL 必须是只读 `SELECT` / `WITH`
+- Gold SQL 必须能在本地 SQLite 中执行
+- 结果行数必须 `<= 500`
+- SQL 长度必须 `<= 1200`
+- 执行时间必须 `<= 5.0` 秒
 
-Current dropped tasks:
+当前删除的任务：
 
-- `too_many_rows`: 48
-- `gold_exec_error`: 3
+- `too_many_rows`：48 条
+- `gold_exec_error`：3 条
 
-## Manifests
+## 清单文件
 
-- `task_pool.raw.manifest.json`: statistics before execution/filtering.
-- `task_pool.filter.manifest.json`: execution and filtering statistics.
+- `task_pool.raw.manifest.json`：执行和过滤前的统计信息
+- `task_pool.filter.manifest.json`：执行和过滤阶段的统计信息
 
-## Intermediate Files
+## 中间文件
 
-The `intermediate/` directory contains audit artifacts, not the default downstream input.
+`intermediate/` 保存审计产物，不是默认下游输入：
 
-- `intermediate/task_pool.raw.jsonl`: deduplicated pool before gold execution.
-- `intermediate/task_pool.with_gold.jsonl`: pool after gold execution, including dropped tasks and filter reasons.
+- `intermediate/task_pool.raw.jsonl`：Gold 执行前的去重任务池
+- `intermediate/task_pool.with_gold.jsonl`：Gold 执行后的完整任务池，包含
+  被删除的任务及过滤原因
 
-Keep these while the data policy is still changing. They are useful for auditing filter decisions, but SFT/RL builders should use `task_pool.filtered.jsonl` by default.
+在数据策略仍可能变化时保留这些文件，便于复查过滤决定。SFT/RL 构造器
+默认应使用 `task_pool.filtered.jsonl`。
 
-## Row Shape
+## 数据行结构
 
-Each row contains fields like:
+每行包含以下字段：
 
 ```json
 {
   "pool_id": "pool_000001",
   "db_id": "aan_1",
-  "db_path": "/absolute/path/to/db.sqlite",
+  "db_path": "data/raw/cspider/database/aan_1/aan_1.sqlite",
   "question_en": null,
   "question_zh": "我们有多少作者？",
   "gold_sql": "SELECT count(*) FROM Author",
@@ -97,9 +100,9 @@ Each row contains fields like:
 }
 ```
 
-## Rebuild Commands
+## 重建命令
 
-From the project root:
+从项目根目录执行：
 
 ```bash
 python3 sqlite_agent/scripts/data/build_task_pool.py \

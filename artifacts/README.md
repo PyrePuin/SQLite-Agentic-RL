@@ -1,19 +1,19 @@
-# Model artifacts
+# 模型产物
 
-Model weights are intentionally not committed to this repository.
+本仓库有意不提交模型权重。
 
-The selected SFT artifact is the LoRA adapter from
-`qwen25-coder3b-sqlite-sft-v3-checkpoint600`. Its local weight file is about
-228 MiB and must be distributed through an external model or file host.
+最终选择的 SFT 产物是
+`qwen25-coder3b-sqlite-sft-v3-checkpoint600` 的 LoRA adapter。本地权重
+文件约为 228 MiB（约 239 MB），应通过独立的模型托管或网盘分发。
 
-Before publishing the adapter, record:
+发布 adapter 前应记录：
 
-- base model: `Qwen/Qwen2.5-Coder-3B-Instruct`
-- adapter format: PEFT LoRA
-- selected optimizer step: 600
-- SHA-256 of `adapter_model.safetensors`
-- download URL
+- 基座模型：`Qwen/Qwen2.5-Coder-3B-Instruct`
+- adapter 格式：PEFT LoRA
+- 选中的优化器步数：600
+- `adapter_model.safetensors` 的 SHA-256
+- 下载地址
 
-The formal Slime/Megatron RL checkpoint is not included because it is about
-41 GiB. The reproducible configuration and validation curve are documented in
-`docs/rl_design_and_results.md`.
+正式 Slime/Megatron RL checkpoint 约为 41 GiB，因此不包含在仓库中。
+可复现配置和验证曲线见
+[`docs/RL设计与结果.md`](../docs/RL设计与结果.md)。
