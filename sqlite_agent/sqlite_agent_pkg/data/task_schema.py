@@ -5,6 +5,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from sqlite_agent_pkg.data.path_utils import PROJECT_MARKERS
+
 
 @dataclass(frozen=True)
 class Task:
@@ -34,14 +36,15 @@ def resolve_db_path(raw_path: str, base_dir: Path | None = None) -> Path:
     if db_path.exists():
         return db_path
 
-    marker = "SQLite-Agentic-RL-V2/"
     text = str(db_path)
-    if marker in text:
-        suffix = text.split(marker, 1)[1]
-        project_root = Path(__file__).resolve().parents[3]
-        candidate = project_root / suffix
-        if candidate.exists():
-            return candidate
+    for project_name in PROJECT_MARKERS:
+        marker = f"{project_name}/"
+        if marker in text:
+            suffix = text.split(marker, 1)[1]
+            project_root = Path(__file__).resolve().parents[3]
+            candidate = project_root / suffix
+            if candidate.exists():
+                return candidate
     return db_path
 
 

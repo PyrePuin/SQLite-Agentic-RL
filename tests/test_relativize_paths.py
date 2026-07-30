@@ -8,6 +8,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT / "sqlite_agent"))
 
 from sqlite_agent_pkg.data.path_utils import relativize_project_paths
+from sqlite_agent_pkg.data.task_schema import resolve_db_path
 
 
 def test_relativizes_local_v2_project_path() -> None:
@@ -18,6 +19,16 @@ def test_relativizes_local_v2_project_path() -> None:
 def test_relativizes_remote_v2_project_path() -> None:
     value = "/root/autodl-tmp/SQLite-Agentic-RL-V2/data/eval/tasks.jsonl"
     assert relativize_project_paths(value) == "data/eval/tasks.jsonl"
+
+
+def test_relativizes_renamed_project_path() -> None:
+    value = "/workspace/SQLite-Agentic-RL/data/raw/spider/db.sqlite"
+    assert relativize_project_paths(value) == "data/raw/spider/db.sqlite"
+
+
+def test_resolves_legacy_absolute_path_from_renamed_project() -> None:
+    value = "/workspace/SQLite-Agentic-RL/pyproject.toml"
+    assert resolve_db_path(value) == PROJECT_ROOT / "pyproject.toml"
 
 
 def test_recurses_through_json_values() -> None:
