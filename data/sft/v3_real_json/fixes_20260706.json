@@ -1,0 +1,14 @@
+{
+  "fixed_tool_call_final_to_final": [
+    {
+      "line": 551,
+      "message_index": 10,
+      "id": "spider_003755__repair_real__json_v2"
+    },
+    {
+      "line": 4602,
+      "message_index": 12,
+      "id": "spider_006965__teacher_agent__json_v2"
+    }
+  ]
+}

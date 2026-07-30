@@ -1,0 +1,74 @@
+{
+  "bad_examples": [],
+  "created_at": "2026-07-06",
+  "description": "V3-real SFT train set = V2 JSON base plus verified English hard teacher agent rollouts.",
+  "base_file": "data/sft/v2_json/sft_v2_json_5486.jsonl",
+  "teacher_real_file": "data/sft/v3_json/teacher_real_hard_en_pass_all_20260706.jsonl",
+  "teacher_rollout_source": "data/teacher_rollouts/hard_teacher_v4pro_en_all_dedup_20260706.jsonl",
+  "output_file": "data/sft/v3_real_json/sft_v3_real_json_5817.jsonl",
+  "rows": 5817,
+  "base_rows": 5486,
+  "teacher_real_rows": 331,
+  "variant_counts": {
+    "agent_trace": 876,
+    "protocol_anchor": 500,
+    "repair_real": 251,
+    "schema_only": 714,
+    "sql_core": 1100,
+    "teacher_agent": 2045,
+    "teacher_agent_real_v3": 331
+  },
+  "protocol_counts": {
+    "json_v2": 5817
+  },
+  "language_counts": {
+    "None": 5486,
+    "en": 331
+  },
+  "assistant_target_counts": {
+    "final": 5506,
+    "tool_call": 16182
+  },
+  "assistant_tool_counts_all": {
+    "execute_sql": 6286,
+    "get_schema": 4486,
+    "list_tables": 3633,
+    "preview_rows": 1777
+  },
+  "assistant_xml_tag_count": 0,
+  "assistant_schema_error_count": 0,
+  "strict_allowed_tool_name_error_count": 0,
+  "teacher_real_db_count": 81,
+  "teacher_real_difficulty_counts": {
+    "hard": 230,
+    "medium": 101
+  },
+  "teacher_real_feature_counts": {
+    "group_by": 96,
+    "having": 56,
+    "join": 288,
+    "limit": 42,
+    "literal_grounding": 64,
+    "multi_table": 331,
+    "nested_query": 143,
+    "order_by": 50,
+    "set_op": 139
+  },
+  "teacher_real_tool_counts": {
+    "execute_sql": 590,
+    "get_schema": 346,
+    "list_tables": 331,
+    "preview_rows": 290
+  },
+  "teacher_real_avg_tool_calls": 4.704,
+  "teacher_real_min_tool_calls": 3,
+  "teacher_real_max_tool_calls": 9,
+  "formal_train": true,
+  "posthoc_fixes": [
+    "Converted historical tool_call name=final targets to canonical final objects in the formal train file."
+  ],
+  "notes": [
+    "All teacher_agent_real_v3 rows are real DeepSeek teacher agent rollouts through the SQLite tool environment and verifier-successful.",
+    "Mechanical v3_json augmentation is bootstrap/ablation only and is not included."
+  ]
+}

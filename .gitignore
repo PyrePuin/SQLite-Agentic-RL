@@ -1,0 +1,28 @@
+.DS_Store
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.venv/
+venv/
+wandb/
+outputs/
+checkpoints/
+
+# Local model artifacts are distributed separately.
+artifacts/*
+!artifacts/README.md
+
+# Raw benchmark downloads are reconstructed locally and may have separate licenses.
+data/raw/*
+!data/raw/README.md
+
+# Internal handoffs, credentials, host details, and operational records.
+private_notes/
+
+# Generated backups and temporary dataset materializations.
+*.abs_path_backup
+*.bak
+*.tmp
+data/**/slime/

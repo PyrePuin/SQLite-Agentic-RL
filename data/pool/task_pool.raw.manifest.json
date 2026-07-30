@@ -1,0 +1,98 @@
+{
+  "inputs": {
+    "data/raw/spider/tasks_all.jsonl": 7000,
+    "data/raw/cspider/tasks_train.jsonl": 8659,
+    "data/raw/cspider/tasks_dev.jsonl": 1034,
+    "data/raw/cspider/tasks_test.jsonl": 2147
+  },
+  "pool_rows": 7637,
+  "dbs": 206,
+  "pairing": {
+    "zh_only": 3660,
+    "paired_en_zh": 2778,
+    "en_only": 1199
+  },
+  "top_dbs": [
+    [
+      "geo",
+      222
+    ],
+    [
+      "academic",
+      176
+    ],
+    [
+      "scholar",
+      158
+    ],
+    [
+      "college_2",
+      121
+    ],
+    [
+      "college_1",
+      120
+    ],
+    [
+      "yelp",
+      99
+    ],
+    [
+      "store_1",
+      92
+    ],
+    [
+      "hr_1",
+      82
+    ],
+    [
+      "music_2",
+      82
+    ],
+    [
+      "soccer_2",
+      80
+    ],
+    [
+      "imdb",
+      75
+    ],
+    [
+      "products_gen_characteristics",
+      73
+    ],
+    [
+      "driving_school",
+      72
+    ],
+    [
+      "music_1",
+      72
+    ],
+    [
+      "allergy_1",
+      68
+    ],
+    [
+      "network_2",
+      68
+    ],
+    [
+      "dorm_1",
+      67
+    ],
+    [
+      "customers_and_addresses",
+      65
+    ],
+    [
+      "bike_1",
+      64
+    ],
+    [
+      "club_1",
+      63
+    ]
+  ],
+  "output": "data/pool/task_pool.raw.jsonl"
+}

@@ -1,0 +1,10 @@
+{
+  "input": "data/teacher_rollouts/hard_teacher_v4pro_en_all_dedup_20260706.jsonl",
+  "output": "data/sft/v3_json/teacher_real_hard_en_pass_all_20260706.jsonl",
+  "input_rows": 620,
+  "output_rows": 331,
+  "reason_counts": {
+    "not_success": 289,
+    "ok": 331
+  }
+}

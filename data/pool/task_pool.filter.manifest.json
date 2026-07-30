@@ -1,0 +1,18 @@
+{
+  "input": "data/pool/task_pool.raw.jsonl",
+  "rows": 7637,
+  "kept": 7586,
+  "dropped": 51,
+  "reasons": {
+    "too_many_rows": 48,
+    "kept": 7586,
+    "gold_exec_error": 3
+  },
+  "max_rows": 500,
+  "max_sql_length": 1200,
+  "timeout_sec": 5.0,
+  "avg_exec_time_sec": 0.0005954166810265788,
+  "max_exec_time_sec": 0.369673959,
+  "with_gold_output": "data/pool/task_pool.with_gold.jsonl",
+  "filtered_output": "data/pool/task_pool.filtered.jsonl"
+}

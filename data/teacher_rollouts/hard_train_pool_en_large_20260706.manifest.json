@@ -1,0 +1,15 @@
+{
+  "input": "data/splits/v2_db_seed42/train.jsonl",
+  "output": "data/teacher_rollouts/hard_train_pool_en_large_20260706.jsonl",
+  "target": 1000,
+  "rows": 1000,
+  "db_count": 92,
+  "max_per_db": 20,
+  "language_mode": "en_only",
+  "feature_counts": {
+    "aggregation": 375,
+    "multi_table": 946,
+    "nested_or_set": 244,
+    "order_limit": 262
+  }
+}

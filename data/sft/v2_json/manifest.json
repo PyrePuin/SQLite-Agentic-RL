@@ -1,0 +1,24 @@
+{
+  "protocol": "json_v2",
+  "source": "data/archive/sft_v1_xml_source_20260705/sft_v1_mixed_5000_repair5.jsonl",
+  "output_dir": "data/sft/v2_json",
+  "converted_output": "data/sft/v2_json/converted_5000.jsonl",
+  "converted_clean_output": "data/sft/v2_json/converted_clean_4986.jsonl",
+  "anchors_output": "data/sft/v2_json/protocol_anchors_600.jsonl",
+  "official_output": "data/sft/v2_json/sft_v2_json_5486.jsonl",
+  "source_rows": 5000,
+  "converted_rows": 5000,
+  "converted_clean_rows": 4986,
+  "length_outlier_rows": 14,
+  "anchor_rows": 600,
+  "official_rows": 5486,
+  "anchor_train_count": 500,
+  "seed": 42,
+  "audit_valid": true,
+  "notes": [
+    "No teacher rollout is performed by this script.",
+    "Assistant targets are normalized to one pure JSON object.",
+    "Tool observations are normalized from XML tool_result tags to JSON user payloads."
+  ],
+  "canonical_project_root": "."
+}

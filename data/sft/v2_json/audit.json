@@ -1,0 +1,193 @@
+{
+  "converted": {
+    "rows": 5000,
+    "variant_counts": {
+      "agent_trace": 878,
+      "repair_real": 252,
+      "schema_only": 717,
+      "sql_core": 1100,
+      "teacher_agent": 2053
+    },
+    "assistant_types": {
+      "final": 5000,
+      "tool_call": 13882
+    },
+    "bad_examples": [],
+    "message_length_chars": {
+      "max": 182056,
+      "p95": 1360,
+      "p99": 2515
+    },
+    "valid": true
+  },
+  "converted_clean": {
+    "rows": 4986,
+    "variant_counts": {
+      "agent_trace": 876,
+      "repair_real": 251,
+      "schema_only": 714,
+      "sql_core": 1100,
+      "teacher_agent": 2045
+    },
+    "assistant_types": {
+      "final": 4986,
+      "tool_call": 13823
+    },
+    "bad_examples": [],
+    "message_length_chars": {
+      "max": 18755,
+      "p95": 1348,
+      "p99": 2479
+    },
+    "valid": true
+  },
+  "anchors": {
+    "rows": 600,
+    "variant_counts": {
+      "protocol_anchor": 600
+    },
+    "assistant_types": {
+      "final": 226,
+      "tool_call": 972
+    },
+    "bad_examples": [],
+    "message_length_chars": {
+      "max": 5323,
+      "p95": 1307,
+      "p99": 2309
+    },
+    "valid": true
+  },
+  "official": {
+    "rows": 5486,
+    "variant_counts": {
+      "agent_trace": 876,
+      "protocol_anchor": 500,
+      "repair_real": 251,
+      "schema_only": 714,
+      "sql_core": 1100,
+      "teacher_agent": 2045
+    },
+    "assistant_types": {
+      "final": 5173,
+      "tool_call": 14627
+    },
+    "bad_examples": [],
+    "message_length_chars": {
+      "max": 18755,
+      "p95": 1343,
+      "p99": 2479
+    },
+    "valid": true
+  },
+  "conversion_stats": {
+    "assistant_final": 5000,
+    "assistant_tool_call": 13882
+  },
+  "conversion_errors": [],
+  "length_filter": {
+    "max_message_chars": 20000,
+    "max_total_chars": 50000,
+    "dropped_rows": 14,
+    "dropped_examples": [
+      {
+        "id": "spider_006877__teacher_agent__json_v2",
+        "db_id": "flight_4",
+        "variant": "teacher_agent",
+        "max_message_chars": 81886,
+        "total_chars": 157553
+      },
+      {
+        "id": "spider_000633__agent_trace__json_v2",
+        "db_id": "store_1",
+        "variant": "agent_trace",
+        "max_message_chars": 28730,
+        "total_chars": 32355
+      },
+      {
+        "id": "spider_006817__teacher_agent__json_v2",
+        "db_id": "flight_4",
+        "variant": "teacher_agent",
+        "max_message_chars": 41819,
+        "total_chars": 45812
+      },
+      {
+        "id": "spider_002205__repair_real__json_v2",
+        "db_id": "formula_1",
+        "variant": "repair_real",
+        "max_message_chars": 20871,
+        "total_chars": 26069
+      },
+      {
+        "id": "spider_003651__schema_only__json_v2",
+        "db_id": "baseball_1",
+        "variant": "schema_only",
+        "max_message_chars": 182056,
+        "total_chars": 185938
+      },
+      {
+        "id": "spider_000645__teacher_agent__json_v2",
+        "db_id": "store_1",
+        "variant": "teacher_agent",
+        "max_message_chars": 84115,
+        "total_chars": 92095
+      },
+      {
+        "id": "spider_000630__teacher_agent__json_v2",
+        "db_id": "store_1",
+        "variant": "teacher_agent",
+        "max_message_chars": 24189,
+        "total_chars": 48948
+      },
+      {
+        "id": "spider_000629__teacher_agent__json_v2",
+        "db_id": "store_1",
+        "variant": "teacher_agent",
+        "max_message_chars": 24189,
+        "total_chars": 29550
+      },
+      {
+        "id": "spider_006818__teacher_agent__json_v2",
+        "db_id": "flight_4",
+        "variant": "teacher_agent",
+        "max_message_chars": 41819,
+        "total_chars": 82085
+      },
+      {
+        "id": "spider_000631__teacher_agent__json_v2",
+        "db_id": "store_1",
+        "variant": "teacher_agent",
+        "max_message_chars": 62717,
+        "total_chars": 117045
+      },
+      {
+        "id": "spider_006878__teacher_agent__json_v2",
+        "db_id": "flight_4",
+        "variant": "teacher_agent",
+        "max_message_chars": 81886,
+        "total_chars": 86400
+      },
+      {
+        "id": "spider_001384__schema_only__json_v2",
+        "db_id": "college_2",
+        "variant": "schema_only",
+        "max_message_chars": 45421,
+        "total_chars": 47829
+      },
+      {
+        "id": "spider_000622__agent_trace__json_v2",
+        "db_id": "store_1",
+        "variant": "agent_trace",
+        "max_message_chars": 26116,
+        "total_chars": 29688
+      },
+      {
+        "id": "spider_001385__schema_only__json_v2",
+        "db_id": "college_2",
+        "variant": "schema_only",
+        "max_message_chars": 45421,
+        "total_chars": 47840
+      }
+    ]
+  }
+}

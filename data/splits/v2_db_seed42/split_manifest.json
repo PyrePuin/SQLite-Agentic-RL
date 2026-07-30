@@ -1,0 +1,723 @@
+{
+  "input": "data/pool/task_pool.filtered.jsonl",
+  "seed": 42,
+  "train_frac": 0.8,
+  "dev_frac": 0.1,
+  "total": {
+    "rows": 7586,
+    "dbs": 206,
+    "language_groups": {
+      "zh_only": 3641,
+      "paired_en_zh": 2759,
+      "en_only": 1186
+    },
+    "difficulty_flags": {
+      "has_join": 3348,
+      "has_group_by": 1607,
+      "has_having": 410,
+      "has_nested_query": 807,
+      "has_set_op": 583,
+      "has_order_by": 1465,
+      "has_limit": 966
+    },
+    "top_dbs": [
+      [
+        "geo",
+        222
+      ],
+      [
+        "academic",
+        176
+      ],
+      [
+        "scholar",
+        158
+      ],
+      [
+        "college_1",
+        120
+      ],
+      [
+        "college_2",
+        115
+      ],
+      [
+        "yelp",
+        99
+      ],
+      [
+        "store_1",
+        88
+      ],
+      [
+        "hr_1",
+        82
+      ],
+      [
+        "music_2",
+        82
+      ],
+      [
+        "soccer_2",
+        80
+      ],
+      [
+        "imdb",
+        75
+      ],
+      [
+        "products_gen_characteristics",
+        73
+      ],
+      [
+        "driving_school",
+        72
+      ],
+      [
+        "music_1",
+        72
+      ],
+      [
+        "allergy_1",
+        68
+      ],
+      [
+        "network_2",
+        68
+      ],
+      [
+        "dorm_1",
+        67
+      ],
+      [
+        "customers_and_addresses",
+        65
+      ],
+      [
+        "club_1",
+        63
+      ],
+      [
+        "movie_1",
+        63
+      ]
+    ]
+  },
+  "splits": {
+    "train": {
+      "rows": 6069,
+      "dbs": 134,
+      "language_groups": {
+        "zh_only": 3010,
+        "paired_en_zh": 2019,
+        "en_only": 1040
+      },
+      "difficulty_flags": {
+        "has_join": 2821,
+        "has_group_by": 1263,
+        "has_having": 309,
+        "has_nested_query": 676,
+        "has_set_op": 470,
+        "has_order_by": 1077,
+        "has_limit": 736
+      },
+      "top_dbs": [
+        [
+          "geo",
+          222
+        ],
+        [
+          "academic",
+          176
+        ],
+        [
+          "scholar",
+          158
+        ],
+        [
+          "college_1",
+          120
+        ],
+        [
+          "college_2",
+          115
+        ],
+        [
+          "yelp",
+          99
+        ],
+        [
+          "store_1",
+          88
+        ],
+        [
+          "hr_1",
+          82
+        ],
+        [
+          "music_2",
+          82
+        ],
+        [
+          "soccer_2",
+          80
+        ],
+        [
+          "imdb",
+          75
+        ],
+        [
+          "products_gen_characteristics",
+          73
+        ],
+        [
+          "driving_school",
+          72
+        ],
+        [
+          "music_1",
+          72
+        ],
+        [
+          "allergy_1",
+          68
+        ],
+        [
+          "network_2",
+          68
+        ],
+        [
+          "dorm_1",
+          67
+        ],
+        [
+          "customers_and_addresses",
+          65
+        ],
+        [
+          "club_1",
+          63
+        ],
+        [
+          "movie_1",
+          63
+        ]
+      ]
+    },
+    "dev": {
+      "rows": 761,
+      "dbs": 36,
+      "language_groups": {
+        "zh_only": 336,
+        "paired_en_zh": 361,
+        "en_only": 64
+      },
+      "difficulty_flags": {
+        "has_nested_query": 65,
+        "has_join": 249,
+        "has_set_op": 58,
+        "has_order_by": 200,
+        "has_group_by": 184,
+        "has_having": 53,
+        "has_limit": 124
+      },
+      "top_dbs": [
+        [
+          "customer_complaints",
+          28
+        ],
+        [
+          "school_finance",
+          27
+        ],
+        [
+          "movie_2",
+          26
+        ],
+        [
+          "document_management",
+          25
+        ],
+        [
+          "insurance_policies",
+          25
+        ],
+        [
+          "musical",
+          25
+        ],
+        [
+          "storm_record",
+          25
+        ],
+        [
+          "election_representative",
+          24
+        ],
+        [
+          "product_catalog",
+          24
+        ],
+        [
+          "products_for_hire",
+          24
+        ],
+        [
+          "concert_singer",
+          23
+        ],
+        [
+          "game_injury",
+          23
+        ],
+        [
+          "book_2",
+          22
+        ],
+        [
+          "candidate_poll",
+          22
+        ],
+        [
+          "device",
+          22
+        ],
+        [
+          "headphone_store",
+          22
+        ],
+        [
+          "theme_gallery",
+          22
+        ],
+        [
+          "university_rank",
+          22
+        ],
+        [
+          "culture_company",
+          21
+        ],
+        [
+          "district_spokesman",
+          21
+        ]
+      ]
+    },
+    "final_eval": {
+      "rows": 756,
+      "dbs": 36,
+      "language_groups": {
+        "paired_en_zh": 379,
+        "zh_only": 295,
+        "en_only": 82
+      },
+      "difficulty_flags": {
+        "has_nested_query": 66,
+        "has_join": 278,
+        "has_order_by": 188,
+        "has_group_by": 160,
+        "has_having": 48,
+        "has_set_op": 55,
+        "has_limit": 106
+      },
+      "top_dbs": [
+        [
+          "train_station",
+          28
+        ],
+        [
+          "wta_1",
+          27
+        ],
+        [
+          "shop_membership",
+          26
+        ],
+        [
+          "architecture",
+          25
+        ],
+        [
+          "body_builder",
+          25
+        ],
+        [
+          "car_racing",
+          25
+        ],
+        [
+          "flight_company",
+          25
+        ],
+        [
+          "e_government",
+          24
+        ],
+        [
+          "mountain_photos",
+          24
+        ],
+        [
+          "wrestler",
+          24
+        ],
+        [
+          "railway",
+          23
+        ],
+        [
+          "restaurants",
+          23
+        ],
+        [
+          "browser_web",
+          22
+        ],
+        [
+          "car_road_race",
+          22
+        ],
+        [
+          "conference",
+          22
+        ],
+        [
+          "entrepreneur",
+          22
+        ],
+        [
+          "protein_institute",
+          22
+        ],
+        [
+          "school_player",
+          22
+        ],
+        [
+          "gymnast",
+          21
+        ],
+        [
+          "school_bus",
+          21
+        ]
+      ]
+    }
+  },
+  "smoke": {
+    "rows": 72,
+    "dbs": 36,
+    "language_groups": {
+      "zh_only": 30,
+      "paired_en_zh": 30,
+      "en_only": 12
+    },
+    "difficulty_flags": {
+      "has_join": 24,
+      "has_nested_query": 8,
+      "has_set_op": 7,
+      "has_order_by": 16,
+      "has_limit": 8,
+      "has_group_by": 14,
+      "has_having": 7
+    },
+    "top_dbs": [
+      [
+        "battle_death",
+        2
+      ],
+      [
+        "bbc_channels",
+        2
+      ],
+      [
+        "book_2",
+        2
+      ],
+      [
+        "candidate_poll",
+        2
+      ],
+      [
+        "club_leader",
+        2
+      ],
+      [
+        "concert_singer",
+        2
+      ],
+      [
+        "course_teach",
+        2
+      ],
+      [
+        "culture_company",
+        2
+      ],
+      [
+        "customer_complaints",
+        2
+      ],
+      [
+        "device",
+        2
+      ],
+      [
+        "district_spokesman",
+        2
+      ],
+      [
+        "document_management",
+        2
+      ],
+      [
+        "election_representative",
+        2
+      ],
+      [
+        "employee_hire_evaluation",
+        2
+      ],
+      [
+        "game_injury",
+        2
+      ],
+      [
+        "headphone_store",
+        2
+      ],
+      [
+        "insurance_policies",
+        2
+      ],
+      [
+        "journal_committee",
+        2
+      ],
+      [
+        "local_govt_and_lot",
+        2
+      ],
+      [
+        "local_govt_in_alabama",
+        2
+      ]
+    ]
+  },
+  "db_overlap_errors": {},
+  "db_assignment": {
+    "geo": "train",
+    "academic": "train",
+    "scholar": "train",
+    "college_1": "train",
+    "college_2": "train",
+    "yelp": "train",
+    "store_1": "train",
+    "hr_1": "train",
+    "music_2": "train",
+    "soccer_2": "train",
+    "imdb": "train",
+    "products_gen_characteristics": "train",
+    "music_1": "train",
+    "driving_school": "train",
+    "network_2": "train",
+    "allergy_1": "train",
+    "dorm_1": "train",
+    "customers_and_addresses": "train",
+    "movie_1": "train",
+    "club_1": "train",
+    "chinook_1": "train",
+    "hospital_1": "train",
+    "cre_Doc_Tracking_DB": "train",
+    "world_1": "train",
+    "activity_1": "train",
+    "department_store": "train",
+    "cre_Theme_park": "train",
+    "bike_1": "train",
+    "game_1": "train",
+    "flight_1": "train",
+    "e_learning": "train",
+    "art_1": "train",
+    "wine_1": "train",
+    "flight_4": "train",
+    "icfp_1": "train",
+    "tracking_grants_for_research": "train",
+    "apartment_rentals": "train",
+    "baseball_1": "train",
+    "cre_Drama_Workshop_Groups": "train",
+    "behavior_monitoring": "train",
+    "cre_Docs_and_Epenses": "train",
+    "loan_1": "train",
+    "bakery_1": "train",
+    "college_3": "train",
+    "manufactory_1": "train",
+    "inn_1": "train",
+    "csu_1": "train",
+    "sakila_1": "train",
+    "formula_1": "train",
+    "customers_card_transactions": "train",
+    "tracking_share_transactions": "train",
+    "car_1": "train",
+    "student_1": "train",
+    "advertising_agencies": "train",
+    "voter_2": "train",
+    "customers_and_invoices": "train",
+    "cre_Doc_Control_Systems": "train",
+    "cre_Doc_Template_Mgt": "train",
+    "match_season": "train",
+    "election": "train",
+    "dog_kennels": "train",
+    "pilot_1": "train",
+    "customers_and_orders": "train",
+    "address_1": "train",
+    "e_commerce": "train",
+    "cre_Doc_and_collections": "train",
+    "flight_2": "train",
+    "cre_Doc_Workflow": "train",
+    "warehouse_1": "train",
+    "tracking_orders": "train",
+    "student_transcripts_tracking": "train",
+    "boat_1": "train",
+    "book_1": "train",
+    "phone_1": "train",
+    "cre_Students_Information_Systems": "train",
+    "planet_1": "train",
+    "swimming": "train",
+    "real_estate_rentals": "train",
+    "aan_1": "train",
+    "tracking_software_problems": "train",
+    "twitter_1": "train",
+    "music_4": "train",
+    "restaurant_1": "train",
+    "medicine_enzyme_interaction": "train",
+    "student_assessment": "train",
+    "sports_competition": "train",
+    "tvshow": "train",
+    "assets_maintenance": "train",
+    "ship_1": "train",
+    "aircraft": "train",
+    "epinions_1": "train",
+    "program_share": "train",
+    "gas_company": "train",
+    "film_rank": "train",
+    "network_1": "train",
+    "insurance_fnol": "train",
+    "small_bank_1": "train",
+    "university_basketball": "train",
+    "customer_complaints": "dev",
+    "train_station": "final_eval",
+    "store_product": "train",
+    "school_finance": "dev",
+    "wta_1": "final_eval",
+    "scientist_1": "train",
+    "movie_2": "dev",
+    "shop_membership": "final_eval",
+    "party_people": "train",
+    "musical": "dev",
+    "body_builder": "final_eval",
+    "entertainment_awards": "train",
+    "document_management": "dev",
+    "car_racing": "final_eval",
+    "insurance_and_eClaims": "train",
+    "storm_record": "dev",
+    "flight_company": "final_eval",
+    "company_office": "train",
+    "insurance_policies": "dev",
+    "architecture": "final_eval",
+    "coffee_shop": "train",
+    "election_representative": "dev",
+    "e_government": "final_eval",
+    "climbing": "train",
+    "product_catalog": "dev",
+    "mountain_photos": "final_eval",
+    "city_record": "train",
+    "products_for_hire": "dev",
+    "wrestler": "final_eval",
+    "cinema": "train",
+    "concert_singer": "dev",
+    "railway": "final_eval",
+    "perpetrator": "train",
+    "game_injury": "dev",
+    "restaurants": "final_eval",
+    "wedding": "train",
+    "university_rank": "dev",
+    "school_player": "final_eval",
+    "county_public_safety": "train",
+    "book_2": "dev",
+    "protein_institute": "final_eval",
+    "farm": "train",
+    "theme_gallery": "dev",
+    "entrepreneur": "final_eval",
+    "vehicle_rent": "train",
+    "headphone_store": "dev",
+    "conference": "final_eval",
+    "department_management": "train",
+    "candidate_poll": "dev",
+    "browser_web": "final_eval",
+    "book_press": "train",
+    "device": "dev",
+    "car_road_race": "final_eval",
+    "pets_1": "train",
+    "local_govt_and_lot": "dev",
+    "school_bus": "final_eval",
+    "station_weather": "train",
+    "race_track": "dev",
+    "gymnast": "final_eval",
+    "video_game": "train",
+    "district_spokesman": "dev",
+    "vehicle_driver": "final_eval",
+    "book_review": "train",
+    "culture_company": "dev",
+    "customers_campaigns_ecommerce": "final_eval",
+    "country_language": "train",
+    "riding_club": "final_eval",
+    "local_govt_in_alabama": "dev",
+    "institution_sports": "train",
+    "orchestra": "final_eval",
+    "soccer_3": "dev",
+    "poker_player": "train",
+    "government_shift": "final_eval",
+    "sing_contest": "dev",
+    "online_exams": "train",
+    "customer_deliveries": "final_eval",
+    "region_building": "dev",
+    "news_report": "train",
+    "local_govt_mdm": "final_eval",
+    "employee_hire_evaluation": "dev",
+    "company_employee": "train",
+    "museum_visit": "final_eval",
+    "ship_mission": "dev",
+    "customers_and_products_contacts": "train",
+    "roller_coaster": "final_eval",
+    "journal_committee": "dev",
+    "performance_attendance": "train",
+    "machine_repair": "final_eval",
+    "club_leader": "dev",
+    "bike_racing": "train",
+    "decoration_competition": "final_eval",
+    "battle_death": "dev",
+    "singer": "train",
+    "party_host": "dev",
+    "workshop_paper": "final_eval",
+    "solvency_ii": "train",
+    "bbc_channels": "dev",
+    "manufacturer": "final_eval",
+    "soccer_1": "train",
+    "phone_market": "dev",
+    "pilot_record": "final_eval",
+    "debate": "train",
+    "course_teach": "dev",
+    "restaurant_bills": "final_eval",
+    "voter_1": "train",
+    "tv_shows": "dev",
+    "company_1": "final_eval",
+    "real_estate_properties": "train"
+  },
+  "outputs": {
+    "train": "data/splits/v2_db_seed42/train.jsonl",
+    "dev": "data/splits/v2_db_seed42/dev.jsonl",
+    "final_eval": "data/splits/v2_db_seed42/final_eval.jsonl",
+    "dev_smoke": "data/splits/v2_db_seed42/dev_smoke.jsonl"
+  }
+}
