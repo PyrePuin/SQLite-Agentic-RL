@@ -13,30 +13,36 @@
 
 `fast_dev` 是 `full_dev` 的 120 条子集，但并非冗余：它用较低推理成本提供更频繁的稳定评测。`mini_dev` 是独立选择的英文困难切片，与 fast/full 的目标不同。
 
-## 已清理的历史版本
-
-- 旧 60 条通用 `mini_dev`：规模过小，已被 110 条英文困难 mini 替代。
-- 旧 120 条中英混合 `hard_mini_dev`：已被英文版替代。
-- 原 `sft_v2_json/` 包装目录：项目当前只有这一套正式评测版本，已扁平化。
-
 ## 使用方式
 
 正式 SFT 调度：
 
 ```bash
+BASE_MODEL=/path/to/Qwen2.5-Coder-3B-Instruct
+
 python sqlite_agent/scripts/sft/run_formal_sft_eval.py \
+  --model "$BASE_MODEL" \
+  --train-data data/sft/v3_real_json/sft_v3_real_json_5817.jsonl \
   --mini-dev data/eval/mini_dev.jsonl \
   --fast-dev data/eval/fast_dev.jsonl \
   --full-dev data/eval/full_dev.jsonl \
-  ...
+  --output-dir checkpoints/qwen25_coder3b_sqlite_sft \
+  --train-samples 5817 \
+  --wandb-run-name sqlite_sft_formal
 ```
 
 单独评测 checkpoint：
 
 ```bash
+BASE_MODEL=/path/to/Qwen2.5-Coder-3B-Instruct
+
 python sqlite_agent/scripts/sft/evaluate_sft_v2_agent.py \
+  --base-model "$BASE_MODEL" \
+  --adapter checkpoints/qwen25_coder3b_sqlite_sft/checkpoint-600 \
   --tasks data/eval/full_dev.jsonl \
-  ...
+  --output outputs/full_dev.jsonl \
+  --summary-output outputs/full_dev.summary.json \
+  --protocol json_v2
 ```
 
 评测必须运行完整 Agent runtime，让模型实际调用 SQLite 工具并提交 final SQL；不能只用 teacher forcing loss 代替。
@@ -53,7 +59,8 @@ python sqlite_agent/scripts/data/build_hard_eval.py \
   --seed 42
 ```
 
-脚本默认不生成单独的 sidecar manifest，避免与本目录统一的 `manifest.json` 产生两个元数据来源。数据策略变化时，应在审计后同步更新统一 manifest。
+本目录使用统一的 `manifest.json` 描述三档评测集。调整采样策略后，应在
+审计 JSONL 内容后同步更新该 manifest。
 
 ## 数据边界
 

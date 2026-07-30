@@ -31,7 +31,20 @@ splits/：train / dev / final_eval
 
 每个子目录的具体文件、规模和重建方式见该目录内的 `README.md`。
 
-## 当前正式输入
+## 推荐使用路径
+
+如果希望从原始数据完整复现：
+
+1. 按 [`raw/README.md`](raw/README.md) 下载并归一化 Spider/CSpider。
+2. 按 [`pool/README.md`](pool/README.md) 合并、执行并过滤任务池。
+3. 按 [`splits/README.md`](splits/README.md) 生成 DB-level 数据划分。
+4. 使用 [`sft/README.md`](sft/README.md) 中的正式训练集运行 SFT。
+5. 使用 [`eval/README.md`](eval/README.md) 选择和评测 checkpoint。
+6. 使用 [`rl/README.md`](rl/README.md) 验证 RL runtime 或构造正式 RL prompts。
+
+如果只希望运行训练与评测，可以直接使用下面列出的仓库内数据。
+
+## 当前推荐输入
 
 ### SFT
 
@@ -68,4 +81,16 @@ splits/：train / dev / final_eval
 ```bash
 cd SQLite-Agentic-RL
 export PYTHONPATH="$PWD/sqlite_agent:${PYTHONPATH:-}"
+```
+
+确认关键数据文件可读取：
+
+```bash
+wc -l \
+  data/sft/v3_real_json/sft_v3_real_json_5817.jsonl \
+  data/eval/mini_dev.jsonl \
+  data/eval/fast_dev.jsonl \
+  data/eval/full_dev.jsonl \
+  data/rl/train_tasks.jsonl \
+  data/rl/val_tasks.jsonl
 ```

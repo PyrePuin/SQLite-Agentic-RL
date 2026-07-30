@@ -229,8 +229,6 @@ python sqlite_agent/scripts/data/relativize_paths.py \
 → data/raw/spider/database/.../db.sqlite
 ```
 
-路径工具同时兼容旧目录名 `SQLite-Agentic-RL-V2`，用于迁移历史数据。
-
 ## 7. 检查归一化结果
 
 ```bash
@@ -328,7 +326,7 @@ data/splits/v2_db_seed42/dev_smoke.jsonl
 data/splits/v2_db_seed42/split_manifest.json
 ```
 
-最后再统一检查并清理派生文件中的机器绝对路径：
+最后统一检查派生文件中的路径，并将机器绝对路径转换为项目相对路径：
 
 ```bash
 python sqlite_agent/scripts/data/relativize_paths.py \
@@ -339,12 +337,12 @@ python sqlite_agent/scripts/data/relativize_paths.py \
 ## 11. 评测口径说明
 
 本项目不是直接复现 Spider/CSpider 官方 train/dev/test leaderboard
-划分，而是把已公开的数据放入统一任务池，再按完整数据库重新建立内部
+划分，而是把已公开的数据放入统一任务池，再按完整数据库重新建立项目
 `train/dev/final_eval`。
 
 因此：
 
-- 项目中的 `final_eval` 是内部数据库级保留集
+- 项目中的 `final_eval` 是项目自定义的数据库级保留集
 - 项目结果不能表述为 Spider 或 CSpider 官方隐藏测试集成绩
 - 如果要与官方 leaderboard 比较，必须另行保留官方划分，并使用官方
   评测脚本

@@ -63,3 +63,10 @@ python3 sqlite_agent/scripts/data/make_splits.py \
   --smoke-per-db 2 \
   --smoke-max-rows 128
 ```
+
+构建完成后，使用 manifest 检查数据库是否跨集合重叠：
+
+```bash
+python -m json.tool data/splits/v2_db_seed42/split_manifest.json >/dev/null
+wc -l data/splits/v2_db_seed42/{train,dev,final_eval,dev_smoke}.jsonl
+```

@@ -1,6 +1,7 @@
 # RL 任务数据
 
-该目录保存用于验证 Slime Agentic RL 链路的轻量任务集。当前只有一套有效版本，因此文件直接放在 `data/rl/`，不再额外套一层 `smoke_v1_768/`。
+该目录提供用于验证 Slime Agentic RL 链路的轻量任务集，包含训练任务、
+验证任务和构造清单。
 
 ## 文件说明
 
@@ -23,7 +24,9 @@
 
 它属于 smoke/repro 数据，不应被描述成正式 2,048 条 RL 训练集。
 
-## 重建当前数据
+## 使用方式
+
+### 1. 重建任务数据
 
 从仓库根目录执行：
 
@@ -42,6 +45,40 @@ python sqlite_agent/scripts/rl/build_rl_smoke_tasks.py \
 ```
 
 脚本默认参数与当前数据一致。重建会覆盖本目录中的 JSONL 和 manifest，执行前应先确认 Git 工作区。
+
+### 2. 运行本地 RL dry-run
+
+dry-run 不更新权重，用于检查 rollout、分组奖励和评测统计：
+
+```bash
+BASE_MODEL=/path/to/Qwen2.5-Coder-3B-Instruct
+ADAPTER=/path/to/sft/checkpoint
+
+python sqlite_agent/scripts/rl/run_rl_dryrun_hf.py \
+  --base-model "$BASE_MODEL" \
+  --adapter "$ADAPTER" \
+  --tasks data/rl/train_tasks.jsonl \
+  --output logs/rl/dryrun_rollouts.jsonl \
+  --summary-output logs/rl/dryrun_summary.json \
+  --limit 100 \
+  --group-size 4
+```
+
+### 3. 启动 Slime smoke
+
+准备合并后的 Hugging Face 模型和 Megatron checkpoint 后：
+
+```bash
+SLIME_ROOT=/path/to/slime \
+MEGATRON_ROOT=/path/to/Megatron-LM \
+MERGED_HF=/path/to/merged-hf \
+MEGATRON_CKPT=/path/to/megatron-checkpoint \
+LOAD_CKPT=/path/to/megatron-checkpoint \
+bash sqlite_agent/scripts/rl/run_slime_rl_smoke.sh
+```
+
+脚本默认读取 `data/rl/train_tasks.jsonl` 和 `data/rl/val_tasks.jsonl`，并将
+运行产物写入 `outputs/`、`logs/` 和 `checkpoints/`。
 
 ## 正式 RL 数据
 

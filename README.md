@@ -143,9 +143,14 @@ invalid tool names:       0
 ```text
 hard_train_pool_en_large_20260706.jsonl
 -> hard_teacher_v4pro_en_all_dedup_20260706.jsonl     # 620
--> teacher_real_hard_en_pass_all_20260706.jsonl       # 331
+-> success=true 且 verifier 通过的轨迹              # 331
 -> sft_v3_real_json_5817.jsonl                        # 5,817
 ```
+
+331 条轨迹可使用
+`sqlite_agent/scripts/sft/build_sft_from_teacher_rollouts.py` 和版本化
+system prompt 重新转换；具体命令见
+[`data/teacher_rollouts/README.md`](data/teacher_rollouts/README.md)。
 
 ### 数据划分
 
@@ -259,14 +264,14 @@ SQLite-Agentic-RL/
 │   ├── raw/                    # Spider/CSpider 原始任务与 SQLite 数据库
 │   ├── pool/                   # 去重任务池与 Gold 执行缓存
 │   ├── splits/                 # 数据库级训练/开发/最终评测划分
-│   ├── sft/                    # V2 基础版、V3 真实轨迹版 SFT 数据
-│   ├── eval/                   # 小型/快速/完整/困难验证集
-│   ├── teacher_rollouts/       # 最终 Teacher 数据来源
-│   └── rl/                     # 可复现冒烟数据；正式第二阶段可重新构建
+│   ├── sft/                    # 基础数据、正式训练集与审计信息
+│   ├── eval/                   # mini / fast / full 三档 Agent 评测集
+│   ├── teacher_rollouts/       # Teacher 候选池、真实轨迹与构造清单
+│   └── rl/                     # RL smoke/repro 任务与构造清单
 ├── sqlite_agent/
 │   ├── sqlite_agent_pkg/
 │   │   ├── agent/              # JSON 协议与解析器
-│   │   ├── compat/             # 仅供历史数据迁移的 XML V1 兼容层
+│   │   ├── compat/             # XML 输入兼容解析
 │   │   ├── data/               # 任务数据结构
 │   │   ├── env/                # SQLite 工具、SQL 安全检查、验证器
 │   │   └── rl/                 # 奖励、Slime Agent、指标
@@ -275,7 +280,7 @@ SQLite-Agentic-RL/
 │       ├── env/                # 环境冒烟测试
 │       ├── sft/                # 数据构造、Teacher rollout、SFT、评测
 │       ├── rl/                 # RL 数据、LoRA 合并、Slime 启动器
-│       └── archive/            # 历史构造器与消融脚本
+│       └── archive/            # 复现实验与消融脚本
 ├── artifacts/                  # 权重交付说明；模型文件不进入 Git
 └── docs/                       # 训练记录、错误分析与实验演变
 ```
@@ -376,6 +381,8 @@ NUM_GPUS=4 \
 ACTOR_GPUS=2 \
 ROLLOUT_GPUS=2 \
 TRAIN_TP_SIZE=2 \
+SLIME_ROOT=/path/to/slime \
+MEGATRON_ROOT=/path/to/Megatron-LM \
 MERGED_HF=/path/to/qwen25-coder3b-sqlite-v3-merged-hf \
 MEGATRON_CKPT=/path/to/qwen25-coder3b-sqlite-v3-torch-dist \
 LOAD_CKPT=/path/to/qwen25-coder3b-sqlite-v3-torch-dist \
@@ -435,9 +442,9 @@ bash sqlite_agent/scripts/rl/run_slime_rl_smoke.sh
 
 - 仓库不分发 Qwen 基座、SFT adapter 或 Slime/Megatron checkpoint；权重交付方式见 `artifacts/README.md`；
 - RL 的 Slime / Megatron / SGLang 依赖未锁入通用 Python 环境，仍需按对应框架版本搭建训练镜像；
-- 当前正式结果来自 Spider/CSpider 风格 SQLite 任务和内部 DB-level holdout，不代表真实企业数据库上的最终效果；
+- 当前正式结果来自 Spider/CSpider 风格 SQLite 任务和项目定义的 DB-level holdout，不代表真实企业数据库上的最终效果；
 - SFT full-dev 与 RL validation 的任务集合不同，跨阶段指标仅用于观察能力水平，不作严格直接对比；
-- 自动化测试覆盖协议、路径迁移和核心 reward；GPU 端到端训练仍依赖对应硬件环境验证。
+- 自动化测试覆盖协议、相对路径解析和核心 reward；GPU 端到端训练仍依赖对应硬件环境验证。
 
 ---
 

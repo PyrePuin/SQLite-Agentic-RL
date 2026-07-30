@@ -1,4 +1,4 @@
-# SFT 脚本
+# SFT 构造、训练与评测
 
 SFT 数据从任务真值池构造，而不是直接读取原始 Spider/CSpider 文件。
 
@@ -15,7 +15,7 @@ Agent 轨迹使用纯 JSON message content，不再使用 XML/HTML 风格标签�
 
 `sql_core` 是独立的直接 SQL 模式：assistant content 就是 SQL 字符串。
 
-当前构造器：
+## 数据构造入口
 
 - `build_sql_core.py`：从划分任务构造确定性的直接 SQL 样本，不需要
   Teacher 模型
@@ -29,55 +29,33 @@ Agent 轨迹使用纯 JSON message content，不再使用 XML/HTML 风格标签�
   - `strict_fail_suspect_label_mismatch`
   - `strict_fail_uncertain`
 - `build_sft_from_teacher_rollouts.py`：把保留的 Teacher 轨迹转换为标准
-  SFT 数据。由于部分历史来源早于 `json_v2`，其 XML 读取逻辑来自隔离的
-  兼容模块
+  SFT 数据，并使用版本化 system prompt 保证结果可复现
 
 不要把每条任务机械展开为
 `list_tables -> get_schema -> execute_sql(gold_sql)` 并作为主要 Agent
 数据。这会让模型模仿固定路径，而不是根据真实环境选择动作。
 
-## 历史冷启动混合数据
-
-Teacher 轨迹引入前曾使用以下近似比例。这不是当前正式 V3 训练集，相关
-生成产物已在 2026-07-10 清理。
-
-当时建议的数据比例：
-
-- 约 `55%` `sql_core`
-- 约 `25%` `tool_trace_bootstrap`
-- 约 `20%` `repair_missing_table`
-
-在每条基础 `sql_core` 数据之上使用：
-
-- `tool_trace_rate = 0.45`
-- `repair_rate = 0.35`
-
-最终混合比例通常接近 55 / 25 / 20。
-
-确定性冷启动、XML 迁移、仅英文构造和机械 V3 增强脚本保存在
-`sqlite_agent/scripts/archive/sft/` 中，仅在明确复现历史消融时使用。
+将成功 Teacher rollout 转成标准 SFT：
 
 ```bash
-python3 sqlite_agent/scripts/archive/sft/build_mixed_sft.py \
-  --input data/splits/v2_db_seed42/train.jsonl \
-  --output-jsonl data/sft/train_v2_mixed.jsonl \
-  --output-parquet data/sft/train_v2_mixed.parquet \
-  --manifest data/sft/train_v2_mixed.manifest.json
+python sqlite_agent/scripts/sft/build_sft_from_teacher_rollouts.py \
+  --input data/teacher_rollouts/hard_teacher_v4pro_en_all_dedup_20260706.jsonl \
+  --output outputs/teacher_sft_331.jsonl \
+  --manifest outputs/teacher_sft_331.manifest.json
 ```
 
-## 正式 V3 流程
+对照实验和消融构造器见
+[`../archive/README.md`](../archive/README.md)。
 
-正式运行使用相互独立的脚本：
+## 正式训练与评测流程
+
+正式流程由三个职责独立的脚本组成：
 
 1. `train_sft_v2_lora.py`：只负责连续 SFT 训练。首次启动时必须使用最终
    `--max-steps`，或者从 Trainer checkpoint 恢复，以保持完整学习率曲线。
 2. `evaluate_sft_v2_agent.py`：只评测一个明确的 checkpoint/adapter 和
    一个明确的评测集。
-3. `cleanup_sft_run.py`：在最终评测后清理训练目录，只保留选中的
-   checkpoint 和结果摘要。
-
-旧的 `run_sft_v2_segmented.py` 已删除，因为它可能在验证边界重置学习率
-调度状态。
+3. `cleanup_sft_run.py`：在结果确认后保留选定 checkpoint 和评测摘要。
 
 ### 正式训练与评测调度器
 
@@ -98,9 +76,38 @@ python sqlite_agent/scripts/sft/run_formal_sft_eval.py \
   --output-dir checkpoints/qwen25_coder3b_sqlite_sft_v3_real_json_formal \
   --epochs 2 \
   --train-samples 5817 \
+  --effective-batch-size 16 \
   --eval-every-steps 100 \
+  --max-length 2048 \
+  --learning-rate 1e-4 \
   --bf16 \
   --local-files-only \
   --wandb-project sqlite-agentic-rl-v2 \
   --wandb-run-name sft_v3_real_json_coder3b_formal
 ```
+
+### 单独评测 checkpoint
+
+```bash
+BASE_MODEL=/path/to/Qwen2.5-Coder-3B-Instruct
+
+python sqlite_agent/scripts/sft/evaluate_sft_v2_agent.py \
+  --base-model "$BASE_MODEL" \
+  --adapter checkpoints/qwen25_coder3b_sqlite_sft_v3_real_json_formal/checkpoint-600 \
+  --tasks data/eval/full_dev.jsonl \
+  --output outputs/full_dev_checkpoint600.jsonl \
+  --summary-output outputs/full_dev_checkpoint600.summary.json \
+  --max-tool-steps 8 \
+  --protocol json_v2
+```
+
+checkpoint 选择优先比较：
+
+- `strict_or_equiv_pass`
+- `sql_executable_rate`
+- `finalization_rate`
+- `canonical_protocol_valid_rate`
+- `parse_failed_rate`
+- `budget_exceeded_rate`
+
+训练 loss 只反映监督目标拟合程度，不能替代真实 Agent rollout 评测。

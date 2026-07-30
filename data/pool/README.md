@@ -35,10 +35,10 @@ task_pool.filtered.jsonl
 - SQL 长度必须 `<= 1200`
 - 执行时间必须 `<= 5.0` 秒
 
-当前删除的任务：
+当前过滤统计：
 
-- `too_many_rows`：48 条
-- `gold_exec_error`：3 条
+- `too_many_rows`：48 条未进入正式任务池
+- `gold_exec_error`：3 条未进入正式任务池
 
 ## 清单文件
 
@@ -51,7 +51,7 @@ task_pool.filtered.jsonl
 
 - `intermediate/task_pool.raw.jsonl`：Gold 执行前的去重任务池
 - `intermediate/task_pool.with_gold.jsonl`：Gold 执行后的完整任务池，包含
-  被删除的任务及过滤原因
+  未通过筛选的任务及过滤原因
 
 在数据策略仍可能变化时保留这些文件，便于复查过滤决定。SFT/RL 构造器
 默认应使用 `task_pool.filtered.jsonl`。
@@ -121,4 +121,11 @@ python3 sqlite_agent/scripts/data/cache_and_filter_task_pool.py \
   --max-rows 500 \
   --max-sql-length 1200 \
   --timeout-sec 5.0
+```
+
+重建完成后，确认正式输入行数和 manifest：
+
+```bash
+wc -l data/pool/task_pool.filtered.jsonl
+python -m json.tool data/pool/task_pool.filter.manifest.json >/dev/null
 ```

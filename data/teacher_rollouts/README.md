@@ -35,13 +35,29 @@ DeepSeek V4 Pro 对候选任务执行后的真实 Agent rollout：
 - 每行保留任务信息、模型工具调用轨迹、最终回答、执行验证、错误信息和耗时；
 - 成功与失败轨迹都保留，便于复查 Teacher 质量和失败模式。
 
-正式 SFT 只吸收其中 331 条 `success=true` 的轨迹。转换脚本为：
+正式 SFT 只吸收其中 331 条 `success=true` 的轨迹。
+
+## 使用方式
+
+将成功轨迹转换为 SFT JSONL：
 
 ```bash
-python sqlite_agent/scripts/sft/build_sft_from_teacher_rollouts.py --help
+python sqlite_agent/scripts/sft/build_sft_from_teacher_rollouts.py \
+  --input data/teacher_rollouts/hard_teacher_v4pro_en_all_dedup_20260706.jsonl \
+  --output outputs/teacher_sft_331.jsonl \
+  --manifest outputs/teacher_sft_331.manifest.json
 ```
 
-转换后的 331 条中间 JSONL 不再单独提交，因为它们已经包含在 `data/sft/v3_real_json/sft_v3_real_json_5817.jsonl` 中，并且可以从本文件重新生成。
+转换脚本使用 `data/sft/v3_real_json/system_prompt_20260706.txt` 中冻结的
+system prompt，输出应为 331 条，并与正式 SFT 中的
+`teacher_agent_real_v3` 子集一致。
+
+检查输出：
+
+```bash
+wc -l outputs/teacher_sft_331.jsonl
+python -m json.tool outputs/teacher_sft_331.manifest.json
+```
 
 ## 数据角色
 
@@ -50,5 +66,5 @@ python sqlite_agent/scripts/sft/build_sft_from_teacher_rollouts.py --help
           ↓ Teacher 实际执行
 620 条去重 rollout
           ├── 331 条 verifier 成功 → 转换并并入正式 SFT
-          └── 289 条失败 → 保留用于错误分析，不进入正式 SFT
+          └── 289 条失败 → 用于错误分析，不进入正式 SFT
 ```
