@@ -269,6 +269,7 @@ SQLite-Agentic-RL/
 │   ├── teacher_rollouts/       # Teacher 候选池、真实轨迹与构造清单
 │   └── rl/                     # RL smoke/repro 任务与构造清单
 ├── sqlite_agent/
+│   ├── README.md               # 核心代码安装、结构与最短验证入口
 │   ├── sqlite_agent_pkg/
 │   │   ├── agent/              # JSON 协议与解析器
 │   │   ├── compat/             # XML 输入兼容解析
@@ -429,12 +430,25 @@ bash sqlite_agent/scripts/rl/run_slime_rl_smoke.sh
 
 ## 文档
 
+### 面试学习笔记
+
+| 文档 | 内容 |
+|---|---|
+| [`docs/数据模块面试学习笔记.md`](docs/数据模块面试学习笔记.md) | 原始数据、统一任务池、执行过滤、DB-level 划分、Teacher 与 SFT 数据组成 |
+| [`docs/SFT模块面试学习笔记.md`](docs/SFT模块面试学习笔记.md) | SFT 目标、数据职责、LoRA 参数、连续训练、Agent 评测与结果 |
+| [`docs/Agent Runtime模块面试学习笔记.md`](docs/Agent%20Runtime模块面试学习笔记.md) | 协议、parser、四工具、状态机、三类 Runtime 与错误处理 |
+| [`docs/RL模块面试学习笔记.md`](docs/RL模块面试学习笔记.md) | Slime/GRPO、奖励公式、reward hacking、多卡配置与验证曲线 |
+
+### 实验记录
+
 | 文档 | 内容 |
 |---|---|
 | [`docs/SFT数据构造演进.md`](docs/SFT数据构造演进.md) | V1 失败、XML → canonical JSON、repair 与真实 Teacher 数据演进 |
 | [`docs/SFT训练与评测.md`](docs/SFT训练与评测.md) | SFT 训练、checkpoint 选择与 Agent 评测入口 |
 | [`docs/错误分析.md`](docs/错误分析.md) | SQL、literal、finalization 等错误分析 |
 | [`docs/RL设计与结果.md`](docs/RL设计与结果.md) | GRPO runtime、reward、工程配置与验证曲线 |
+
+代码目录的文件职责和使用方式见 [`sqlite_agent/README.md`](sqlite_agent/README.md)。
 
 ---
 

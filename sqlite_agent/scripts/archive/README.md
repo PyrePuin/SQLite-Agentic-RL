@@ -10,6 +10,8 @@
 | `sft/build_sft_v3_augmented.py` | 构造机械轨迹增强消融组 |
 | `sft/build_english_formal_sft.py` | 构造仅英文训练集对照组 |
 
+各脚本的输入定位与使用约束见 [`sft/README.md`](sft/README.md)。
+
 ## 使用方式
 
 先查看目标脚本的参数和默认输出：

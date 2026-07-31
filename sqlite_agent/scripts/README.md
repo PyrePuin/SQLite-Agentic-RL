@@ -80,7 +80,7 @@ python sqlite_agent/scripts/sft/evaluate_sft_v2_agent.py --help
 python sqlite_agent/scripts/rl/run_rl_dryrun_hf.py --help
 ```
 
-再按 [`data/rl/README.md`](../../data/rl/README.md) 准备 Slime 环境并启动训练。
+再按 [`rl/README.md`](rl/README.md) 准备模型与 Slime 环境并启动训练；任务数据口径见 [`data/rl/README.md`](../../data/rl/README.md)。
 
 ## 6. 复现实验与消融
 
