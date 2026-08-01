@@ -26,3 +26,6 @@ private_notes/
 *.bak
 *.tmp
 data/**/slime/
+
+# Local Superpowers planning and design artifacts.
+docs/superpowers/
