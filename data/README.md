@@ -1,6 +1,6 @@
 # 数据目录说明
 
-`data/` 保存 SQLite Agentic RL 从原始任务到 SFT、评测和 RL 输入的完整数据链路。任务中的数据库路径统一使用仓库相对路径，便于在本地、训练服务器和 CI 环境之间迁移。
+`data/` 保存 SQLite Agentic RL 从原始任务到 SFT、评测和 RL 输入的主要数据链路。任务池、数据划分和 Teacher 增量均提供可运行脚本；正式 SFT 文件已经随仓库发布，但历史基础 SFT 的全部构造过程并未整理成一条从零运行的一键流水线。任务中的数据库路径统一使用仓库相对路径，便于在本地、训练服务器和 CI 环境之间迁移。
 
 ## 数据流
 
@@ -33,7 +33,7 @@ splits/：train / dev / final_eval
 
 ## 推荐使用路径
 
-如果希望从原始数据完整复现：
+如果希望理解并重跑可公开复现的数据处理链路：
 
 1. 按 [`raw/README.md`](raw/README.md) 下载并归一化 Spider/CSpider。
 2. 按 [`pool/README.md`](pool/README.md) 合并、执行并过滤任务池。
@@ -41,6 +41,8 @@ splits/：train / dev / final_eval
 4. 使用 [`sft/README.md`](sft/README.md) 中的正式训练集运行 SFT。
 5. 使用 [`eval/README.md`](eval/README.md) 选择和评测 checkpoint。
 6. 使用 [`rl/README.md`](rl/README.md) 验证 RL runtime 或构造正式 RL prompts。
+
+这里的“重跑”边界是：可以从 Spider/CSpider 构造统一任务池与 DB-level split，也可以重跑公开 Teacher 轨迹的审计和 331 条增量转换；仓库没有提供从原始任务逐条重建历史 5,486 条基础 SFT 的全部构造脚本。训练复现应直接使用已经发布的 5,817 条正式文件。更具体的脚本顺序与命令见 [`sqlite_agent/scripts/data/README.md`](../sqlite_agent/scripts/data/README.md) 和 [`sqlite_agent/scripts/sft/README.md`](../sqlite_agent/scripts/sft/README.md)。
 
 如果只希望运行训练与评测，可以直接使用下面列出的仓库内数据。
 
@@ -52,6 +54,8 @@ splits/：train / dev / final_eval
 - 规模：5,817 条
 - 协议：`json_v2`
 - 组成：5,486 条 V2 基础数据 + 331 条验证成功的真实 Teacher Agent 轨迹
+
+七类样本的职责和数量见 [`sft/README.md`](sft/README.md)。
 
 ### 评测
 

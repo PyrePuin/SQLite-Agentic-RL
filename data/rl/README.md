@@ -80,6 +80,8 @@ bash sqlite_agent/scripts/rl/run_slime_rl_smoke.sh
 脚本默认读取 `data/rl/train_tasks.jsonl` 和 `data/rl/val_tasks.jsonl`，并将
 运行产物写入 `outputs/`、`logs/` 和 `checkpoints/`。
 
+Slime 安装、SFT LoRA 合并、Hugging Face 到 Megatron checkpoint 转换和完整启动顺序见 [`sqlite_agent/scripts/rl/README.md`](../../sqlite_agent/scripts/rl/README.md)。
+
 ## 正式 RL 数据
 
 正式实验可以从 `data/splits/v2_db_seed42/train.jsonl` 和 dev 数据重新生成更大的任务集，例如 2,048 条训练任务。正式实验的数据规模、随机种子和难度比例必须由单独 manifest 记录；不要直接改写本 README 中的 smoke 统计。

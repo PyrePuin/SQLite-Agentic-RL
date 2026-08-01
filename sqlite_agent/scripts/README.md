@@ -7,9 +7,39 @@
 export PYTHONPATH="$PWD/sqlite_agent:${PYTHONPATH:-}"
 ```
 
+## 完整运行链路
+
+```text
+scripts/data/
+  原始数据归一化 → 任务池 → Gold 缓存 → DB-level split → mini-dev
+        ↓
+scripts/env/
+  SQLite 四工具与 verifier 冒烟检查
+        ↓
+scripts/sft/
+  使用已发布 5,817 条正式数据 → token 检查 → LoRA 训练 → Agent 评测
+  （可选：Teacher rollout → audit → bucket → 重建 331 条增量）
+        ↓
+scripts/rl/
+  RL prompts → HF dry-run → LoRA 合并 → Megatron 转换 → Slime GRPO
+```
+
+| 目标 | 详细运行手册 |
+|---|---|
+| 从 Spider/CSpider 构造任务池与划分 | [`data/README.md`](data/README.md) |
+| 检查 SQLite Agent 环境 | [`env/README.md`](env/README.md) |
+| 理解正式 SFT 组成并运行训练/评测 | [`sft/README.md`](sft/README.md) |
+| 安装 Slime 并运行 RL | [`rl/README.md`](rl/README.md) |
+| 复现早期 SFT 消融 | [`archive/README.md`](archive/README.md) |
+
+正式 SFT 文件已经发布，可跳过原始数据和 Teacher API 采集，直接从
+`scripts/sft/README.md` 的“运行链路 A”开始。若要研究完整数据演进，需注意
+历史 5,486 条基础集没有保留从原始任务池逐字节重建的全部脚本；具体边界
+已在 SFT 运行手册中说明。
+
 ## 1. 准备数据
 
-`data/` 提供从 Spider/CSpider 到可训练任务划分的完整流水线：
+`scripts/data/` 提供从 Spider/CSpider 到统一任务池和可训练任务划分的完整流水线；它不负责从零重建全部 SFT 混合数据：
 
 - `data/normalize_raw_datasets.py`：将原始 Spider/CSpider JSON 归一化为
   统一任务结构
@@ -23,7 +53,8 @@ export PYTHONPATH="$PWD/sqlite_agent:${PYTHONPATH:-}"
   `train/dev/final_eval`，并构造小型开发集冒烟子集
 - `data/build_hard_eval.py`：从 dev split 构造英文困难 mini 评测集
 
-完整下载和构造命令见 [`data/raw/README.md`](../../data/raw/README.md)。
+完整执行顺序与命令见 [`data/README.md`](data/README.md)，下载与解压说明见
+[`data/raw/README.md`](../../data/raw/README.md)。
 
 ## 2. 验证 SQLite 环境
 

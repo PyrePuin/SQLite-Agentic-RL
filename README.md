@@ -290,7 +290,7 @@ SQLite-Agentic-RL/
 
 ## 快速开始
 
-### 1. 环境说明
+### 1. 基础环境与 SFT
 
 当前正式运行验证过的基础环境：
 
@@ -300,7 +300,7 @@ CUDA 12.4
 PyTorch 2.5.1
 ```
 
-核心环境和测试可通过 `pyproject.toml` 安装；SFT 使用可选依赖。GRPO 额外依赖 Slime、Megatron-LM、SGLang 和 Ray，应遵循 Slime 对应版本的环境安装方式。
+核心环境和测试可通过 `pyproject.toml` 安装；SFT 使用可选依赖。
 
 ```bash
 cd SQLite-Agentic-RL
@@ -308,9 +308,35 @@ python -m pip install -e '.[dev]'
 export PYTHONPATH="$PWD/sqlite_agent:${PYTHONPATH:-}"
 ```
 
-需要运行 SFT 时使用 `python -m pip install -e '.[sft]'`。
+需要运行 SFT 时使用：
 
-### 2. 验证 SQLite 环境
+```bash
+python -m pip install -e '.[sft,data,dev]'
+```
+
+各阶段的完整命令不是集中堆在根 README 中：
+
+- 数据下载、任务池、Gold 缓存与划分：[`sqlite_agent/scripts/data/README.md`](sqlite_agent/scripts/data/README.md)
+- 正式 SFT 数据组成、Teacher 增量、训练与评测：[`sqlite_agent/scripts/sft/README.md`](sqlite_agent/scripts/sft/README.md)
+- RL 数据、模型转换与 Slime GRPO：[`sqlite_agent/scripts/rl/README.md`](sqlite_agent/scripts/rl/README.md)
+
+### 2. Slime RL 环境
+
+GRPO 额外依赖 Slime、Megatron-LM、SGLang 和 Ray。Slime 官方建议优先使用预装兼容依赖的 Docker 镜像：
+
+```bash
+docker pull slimerl/slime:latest
+
+docker run --rm --gpus all --ipc=host --shm-size=16g \
+  --ulimit memlock=-1 --ulimit stack=67108864 \
+  -v /host/path/SQLite-Agentic-RL:/workspace/SQLite-Agentic-RL \
+  -v /host/path/models:/models \
+  -it slimerl/slime:latest /bin/bash
+```
+
+本项目尚未在通用 Python extras 中锁定 Slime/Megatron/SGLang 的完整版本组合。当前安装、兼容性检查、HF→Megatron 转换和正式启动步骤见 [`RL 运行指南`](sqlite_agent/scripts/rl/README.md)。官方参考：[Quick Start](https://github.com/THUDM/slime/blob/main/docs/en/get_started/quick_start.md)、[Usage Guide](https://github.com/THUDM/slime/blob/main/docs/en/get_started/usage.md)。
+
+### 3. 验证 SQLite 环境
 
 ```bash
 python sqlite_agent/scripts/env/smoke_agent_env.py \
@@ -319,7 +345,7 @@ python sqlite_agent/scripts/env/smoke_agent_env.py \
 
 该命令会检查 `list_tables`、`get_schema`、`preview_rows`、`execute_sql` 和 gold verifier。
 
-### 3. 运行正式 SFT
+### 4. 运行正式 SFT
 
 ```bash
 BASE_MODEL=/path/to/Qwen2.5-Coder-3B-Instruct
@@ -343,7 +369,7 @@ python sqlite_agent/scripts/sft/run_formal_sft_eval.py \
   --wandb-run-name sft_v3_real_json_coder3b_formal
 ```
 
-### 4. 单独评测 checkpoint
+### 5. 单独评测 checkpoint
 
 ```bash
 python sqlite_agent/scripts/sft/evaluate_sft_v2_agent.py \
@@ -357,7 +383,7 @@ python sqlite_agent/scripts/sft/evaluate_sft_v2_agent.py \
   --local-files-only
 ```
 
-### 5. 构造正式 RL prompts
+### 6. 构造正式 RL prompts
 
 ```bash
 python sqlite_agent/scripts/rl/build_rl_smoke_tasks.py \
@@ -373,7 +399,7 @@ python sqlite_agent/scripts/rl/build_rl_smoke_tasks.py \
   --max-empty-ratio 0.08
 ```
 
-### 6. 启动 Slime GRPO
+### 7. 启动 Slime GRPO
 
 先将 SFT LoRA 合并为 Hugging Face 模型并转换为 Slime/Megatron checkpoint，随后在已配置的 Slime 环境中运行：
 

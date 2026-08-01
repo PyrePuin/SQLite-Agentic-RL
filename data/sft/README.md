@@ -45,6 +45,27 @@ v3_real_json/sft_v3_real_json_5817.jsonl
 - 331 条 `teacher_agent_real_v3` 均来自真实工具环境且通过 verifier；
 - 训练文件已经包含两条后处理协议修复。
 
+## 正式数据由什么组成
+
+| 类型 | 数量 | 大概内容 |
+|---|---:|---|
+| `teacher_agent` | 2,045 | Teacher 生成的多轮工具调用示范，学习常规 Agent 解题流程 |
+| `sql_core` | 1,100 | schema 与问题到 Gold SQL 的直接映射，稳住 SQL 基础能力 |
+| `agent_trace` | 876 | 展开后的工具调用轨迹，学习查询数据库再作答的顺序 |
+| `schema_only` | 714 | 以 schema 理解为主的样本，强化表、列和关系识别 |
+| `protocol_anchor` | 500 | 强化 JSON tool call 与 final 输出格式的协议锚点 |
+| `repair_real` | 251 | 基于真实错误整理的修复样本，学习从失败 SQL 或错误反馈中纠正 |
+| `teacher_agent_real_v3` | 331 | Teacher 在真实 SQLite runtime 中执行并经 verifier 验证成功的困难多表轨迹 |
+| **合计** | **5,817** | 当前正式训练文件 |
+
+这不是七个互斥能力模块的简单拼接，而是“SQL 基础能力 + schema grounding + Agent 工具协议 + 多轮轨迹 + 错误修复”的混合训练配方。整个文件统一为 `json_v2` 协议，共包含 16,182 个 assistant 工具调用 target 和 5,506 个 final target。
+
+## 构造脚本的边界
+
+仓库已经发布可直接使用的正式文件 `v3_real_json/sft_v3_real_json_5817.jsonl`，以及相应 manifest、audit 和 Teacher 来源。因此，训练、审计和 331 条真实 Teacher 增量的转换可以直接运行。
+
+仓库**没有提供从 Spider/CSpider 原始任务开始、逐条重建历史 5,486 条基础 SFT 的完整构造脚本**。现有脚本可以构造新的 SQL core、采集新的 Teacher rollout，并重建公开的 331 条 Teacher 增量，但不能承诺从零逐字节生成相同的 5,817 条文件。实验复现请直接使用已发布正式集；研究新数据配方时，再按 [`sqlite_agent/scripts/sft/README.md`](../../sqlite_agent/scripts/sft/README.md) 的运行链路生成新版本。
+
 ## 使用方式
 
 运行正式 SFT：
@@ -79,3 +100,5 @@ python -m json.tool data/sft/v3_real_json/audit.json >/dev/null
 
 构造或修改 SFT 数据后，应同时检查对应的 `manifest.json` 和
 `audit.json`，不能只比较 JSONL 行数。
+
+更完整的训练前检查、LoRA 训练、Agent 评测和 Teacher 构造命令见 [`sqlite_agent/scripts/sft/README.md`](../../sqlite_agent/scripts/sft/README.md)。
