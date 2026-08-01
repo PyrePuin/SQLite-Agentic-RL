@@ -100,7 +100,7 @@ def execute_sql(db_path: str | Path, sql: str, max_rows: int | None = MAX_OBSERV
             "ok": True,
             "sql": str(guard["sql"]),
             "columns": columns,
-            "rows": [[row[column] for column in columns] for row in rows],
+            "rows": [[row[index] for index in range(len(columns))] for row in rows],
             "row_count": len(rows),
             "truncated": truncated,
         }

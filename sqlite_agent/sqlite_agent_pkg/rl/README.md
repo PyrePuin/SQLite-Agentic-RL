@@ -24,4 +24,4 @@ python sqlite_agent/scripts/rl/prepare_slime_data.py \
   --output-parquet outputs/rl/train.parquet
 ```
 
-本地 dry-run 和正式启动方式见 [`../../scripts/rl/README.md`](../../scripts/rl/README.md)。奖励公式、GRPO 数据流与 reward hacking 分析见 [`../../../docs/RL模块面试学习笔记.md`](../../../docs/RL模块面试学习笔记.md)。
+本地 dry-run 和正式启动方式见 [`../../scripts/rl/README.md`](../../scripts/rl/README.md)。奖励公式、GRPO 数据流与 reward hacking 分析见 [`../../../docs/面试笔记/RL模块.md`](../../../docs/面试笔记/RL模块.md)。

@@ -60,6 +60,8 @@ flowchart LR
 
 SFT 的 `full-dev` 与 GRPO 的 120-task validation 并非同一评测集合，不能直接视为严格的前后对比。GRPO 在同一份 RL validation 上，从 rollout 49 的 `strict 50.8% / equivalent 60.0%` 提升到 rollout 349 的 `strict 73.3% / equivalent 78.3%`。
 
+可提交的结构化摘要位于 [`results/`](results/README.md)。当前数值由现有正式记录转录，并已核对对应 W&B run 身份；仓库尚未包含逐任务历史 rollout 或 W&B 原始 history，因此不能从这些摘要独立重算聚合指标。
+
 ---
 
 ## Agent 环境
@@ -154,9 +156,11 @@ system prompt 重新转换；具体命令见
 
 ### 数据划分
 
-训练集、开发集与最终评测集按完整 `db_id` 划分，而不是随机拆分问题，
-避免同一 schema 同时进入训练和验证。Spider/CSpider 在进入任务池后按
-`(db_id, normalized_gold_sql)` 去重。
+划分产物按完整 `db_id` 拆分训练、开发与最终评测，而不是随机拆问题；
+Spider/CSpider 在进入任务池后按 `(db_id, normalized_gold_sql)` 去重。
+这描述的是 split 文件的设计。历史 SFT 混合数据经历过多阶段迁移，现有
+checkpoint 指标不作为严格未见 schema 泛化证据；边界说明见
+[`数据管线`](docs/技术设计/数据管线.md)。
 
 ---
 
@@ -207,8 +211,14 @@ gradient checkpointing: enabled
 | 解析失败 | `-0.30` |
 | 协议无效 | `-0.20` |
 | 超出步数预算 | `-0.10` |
+| final 与最后成功执行 SQL 不同 | 正确项封顶 `0.80`，另扣 `-0.05` |
 | 不安全 SQL | `-1.00` |
 | 超过 6 次工具调用 | 每步 `-0.02` |
+
+`final mismatch` 约束的是提交行为，不直接判断答案对错。verifier 始终重跑
+final 中真正提交的 SQL：它本身正确但未匹配最后成功执行 SQL 时得到
+`min(1.0, 0.80) - 0.05 = 0.75`。详细算例见
+[`RL 与奖励设计`](docs/技术设计/RL与奖励设计.md#final-mismatch-与-075)。
 
 正式 Stage 2 配置：
 
@@ -283,7 +293,10 @@ SQLite-Agentic-RL/
 │       ├── rl/                 # RL 数据、LoRA 合并、Slime 启动器
 │       └── archive/            # 复现实验与消融脚本
 ├── artifacts/                  # 权重交付说明；模型文件不进入 Git
-└── docs/                       # 训练记录、错误分析与实验演变
+├── results/                    # 可提交的 SFT / RL 结构化结果摘要
+└── docs/
+    ├── 技术设计/               # 系统事实、实现与证据边界
+    └── 面试笔记/               # 面试讲述与常见追问
 ```
 
 ---
@@ -456,25 +469,12 @@ bash sqlite_agent/scripts/rl/run_slime_rl_smoke.sh
 
 ## 文档
 
-### 面试学习笔记
+[`docs/README.md`](docs/README.md) 将公开文档分成两组：
 
-| 文档 | 内容 |
-|---|---|
-| [`docs/数据模块面试学习笔记.md`](docs/数据模块面试学习笔记.md) | 原始数据、统一任务池、执行过滤、DB-level 划分、Teacher 与 SFT 数据组成 |
-| [`docs/SFT模块面试学习笔记.md`](docs/SFT模块面试学习笔记.md) | SFT 目标、数据职责、LoRA 参数、连续训练、Agent 评测与结果 |
-| [`docs/Agent Runtime模块面试学习笔记.md`](docs/Agent%20Runtime模块面试学习笔记.md) | 协议、parser、四工具、状态机、三类 Runtime 与错误处理 |
-| [`docs/RL模块面试学习笔记.md`](docs/RL模块面试学习笔记.md) | Slime/GRPO、奖励公式、reward hacking、多卡配置与验证曲线 |
+- `docs/技术设计/`：数据管线、SFT、Agent 运行时、RL 奖励与评测边界；
+- `docs/面试笔记/`：数据、SFT、Runtime、RL 四个模块的讲述和常见追问。
 
-### 实验记录
-
-| 文档 | 内容 |
-|---|---|
-| [`docs/SFT数据构造演进.md`](docs/SFT数据构造演进.md) | V1 失败、XML → canonical JSON、repair 与真实 Teacher 数据演进 |
-| [`docs/SFT训练与评测.md`](docs/SFT训练与评测.md) | SFT 训练、checkpoint 选择与 Agent 评测入口 |
-| [`docs/错误分析.md`](docs/错误分析.md) | SQL、literal、finalization 等错误分析 |
-| [`docs/RL设计与结果.md`](docs/RL设计与结果.md) | GRPO runtime、reward、工程配置与验证曲线 |
-
-代码目录的文件职责和使用方式见 [`sqlite_agent/README.md`](sqlite_agent/README.md)。
+代码目录的文件职责和使用方式见 [`sqlite_agent/README.md`](sqlite_agent/README.md)，实验结果入口见 [`results/README.md`](results/README.md)。
 
 ---
 
@@ -482,9 +482,10 @@ bash sqlite_agent/scripts/rl/run_slime_rl_smoke.sh
 
 - 仓库不分发 Qwen 基座、SFT adapter 或 Slime/Megatron checkpoint；权重交付方式见 `artifacts/README.md`；
 - RL 的 Slime / Megatron / SGLang 依赖未锁入通用 Python 环境，仍需按对应框架版本搭建训练镜像；
-- 当前正式结果来自 Spider/CSpider 风格 SQLite 任务和项目定义的 DB-level holdout，不代表真实企业数据库上的最终效果；
+- 当前正式结果来自 Spider/CSpider 风格 SQLite 任务；划分文件按 DB 隔离，但历史训练数据来源使已发布指标不能作为严格未见 schema 泛化证明；
 - SFT full-dev 与 RL validation 的任务集合不同，跨阶段指标仅用于观察能力水平，不作严格直接对比；
-- 自动化测试覆盖协议、相对路径解析和核心 reward；GPU 端到端训练仍依赖对应硬件环境验证。
+- 当前结果目录是正式记录的结构化转录，缺少逐任务历史 rollout 和 W&B 原始 history；
+- 自动化测试覆盖协议、相对路径解析、SQLite 重复列结果读取和核心 reward；GPU 端到端训练仍依赖对应硬件环境验证。
 
 ---
 

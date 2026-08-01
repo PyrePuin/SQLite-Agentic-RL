@@ -146,12 +146,12 @@ R = R_outcome + P_parse + P_budget + P_protocol
 |---|---|---:|
 | canonical、6 步内、结果等价、final 匹配 | `1.00` | `1.00` |
 | canonical、结果错误但 SQL 可执行 | `0.20` | `0.20` |
-| 结果等价，但 final 未匹配最后成功 SQL | `min(1,.80) - .05` | `0.75` |
+| final 自身结果等价，但未匹配最后成功 SQL | `min(1,.80) - .05` | `0.75` |
 | 结果等价、用了 8 个工具步骤 | `1.00 - 2×.02` | `0.96` |
 | 解析失败且没有 final | `0 - .30 - .20 - .05`，具体还取决于传入 flags | 负值 |
 | 提交 `DROP TABLE` | 硬分支 | `-1.00` |
 
-第三个例子说明 finalization 当前是软约束：正确但未执行确认的 final 仍可得到 0.75，而不是零分。这是设计选择，也是后面 reward hacking 分析中的残余风险。
+第三个例子中，verifier 重新执行的是 final 里真正提交的 SQL；它本身结果正确，所以保留大部分正确性奖励。mismatch 只说明这条 SQL 没有经过上一轮成功执行确认，因此正确项先封顶 0.80，再扣 0.05，得到 0.75。这是行为一致性的软约束，不是用“上一条正确 SQL”替 final 得分。
 
 ## 7. 为什么 outcome 要占主导
 
@@ -187,7 +187,7 @@ Reward hacking 不是“模型写出了与 Gold SQL 不同但结果等价的 SQL
 |---|---|---|
 | 始终提交 `SELECT 1` 获取可执行奖励 | 正确为 `1.0`，错误可执行仅 `0.2`；同时监控 equivalent | **仍是残余风险。** 若早期组内大多错误，`.2` 可能成为局部策略；可退火部分奖励或仅对“接近正确”给 shaping |
 | 只刷 canonical JSON 和工具调用 | 协议没有独立大额正奖励，主要是惩罚 | 监控 protocol 已满但 equivalent 不升；避免把过程指标当主 reward |
-| 执行一条好 SQL，再提交未经执行的另一条 | 记录 last successful SQL；mismatch `-.05`；reward 验证真正提交的 final | 正确但 mismatch 仍有 `.75`，只是软约束；可改为 mismatch 时不给满额正确奖励或要求硬匹配 |
+| 执行一条 SQL，再提交未经确认的另一条 | 记录 last successful SQL；reward 重新执行真正提交的 final | final 自身正确但 mismatch 仍有 `.75`，属于软约束；若更重视流程一致性可改成硬匹配 |
 | 用写操作改数据库制造答案 | `mode=ro` 连接、SQL guard、危险 SQL `-1` | 关键词 guard 不是完整 SQL parser；高安全场景可加 SQLite authorizer/隔离副本 |
 | 无限调用工具等待偶然成功 | 最大步数；6 步后每步 `-.02` | 工具成本是线性软惩罚；可按工具成本差异化收费 |
 | 利用 observation 截断伪造局部匹配 | verifier 重跑 final，使用完整结果 `max_rows=None` | 上下文截断仍可能影响求解，但不能直接骗过 verifier |
@@ -282,7 +282,7 @@ avg_tool_steps / final_matches_last_execute
 
 最佳点是 rollout 349，而不是最终 rollout 499。后期小幅回落说明在线 RL 同样需要 early stopping/checkpoint selection。
 
-可靠结论是：在同一 RL validation 上，49 → 349 的 strict 从 50.8% 提升到 73.3%，equivalent 从 60.0% 提升到 78.3%，协议保持稳定，超步数降到 0%。
+可靠结论是：在同一 RL validation 上，49 → 349 的 strict 从 50.8% 提升到 73.3%，equivalent 从 60.0% 提升到 78.3%，协议保持稳定，超步数降到 0%。结构化曲线见 [`results/rl/stage2.validation.jsonl`](../../results/rl/stage2.validation.jsonl)；它由现有正式记录转录并关联 W&B run，不是原始 history 导出。
 
 不能直接说“RL 把 SFT 的 66.3% 提到 78.3%”，因为 SFT full-dev 是 300 条，RL validation 是另一份 120 条集合。跨阶段严格增益必须在同一评测集、同一推理参数下重跑才成立。
 
@@ -290,7 +290,7 @@ avg_tool_steps / final_matches_last_execute
 
 ### 一分钟版本
 
-> 我们在 SFT checkpoint-600 上用 Slime 做 GRPO。Slime 负责编排，SGLang 做 rollout，Megatron 做 actor 更新，Ray 调度资源，自定义 SQLite Runtime 负责多轮工具交互和 reward。同一 prompt 采 4 条轨迹做组内相对优势。奖励以完整执行结果为主：等价正确 +1，可执行但错误 +0.2，不可执行提交 +0.05，并对解析、协议、超步数、final mismatch 和不安全 SQL惩罚。我们没有只看平均 reward，而是同时监控 strict、equivalent、executable 和 protocol，防止模型通过 `SELECT 1`、刷格式或过早结束来 reward hack。4 卡 2+2 隔离配置完成约 8,192 条轨迹，固定验证集最佳点在 rollout 349，equivalent 78.3%、strict 73.3%。
+> 我们在 SFT checkpoint-600 上用 Slime 做 GRPO。Slime 负责编排，SGLang 做 rollout，Megatron 做 actor 更新，Ray 调度资源，自定义 SQLite Runtime 负责多轮工具交互和 reward。同一 prompt 采 4 条轨迹做组内相对优势。奖励以完整执行结果为主：等价正确 +1，可执行但错误 +0.2，不可执行提交 +0.05，并对解析、协议、超步数、final mismatch 和不安全 SQL 惩罚。final mismatch 只约束“执行确认后原样提交”，真正的正确性始终由 final SQL 重跑决定。4 卡 2+2 隔离配置完成约 8,192 条轨迹，现有记录的固定验证集最佳点在 rollout 349，equivalent 78.3%、strict 73.3%。
 
 ### 常见追问
 
@@ -300,7 +300,7 @@ avg_tool_steps / final_matches_last_execute
 
 **最终 SQL 正确但没执行过，为什么不直接零分？**
 
-当前设计是软约束，实际得到 0.75，保留偶然正确解的学习信号。但这是明确的残余攻击面，严格版本应要求 final 与最后成功 SQL 匹配才能获得满额结果奖励。
+当前设计是软约束。verifier 重新执行 final SQL；如果它确实正确，正确项封顶 0.80，再扣 0.05，实际得到 0.75，以保留正确解的学习信号。若业务更强调“所有提交都必须先执行确认”，可以改成硬匹配。
 
 **如何证明提升不是 reward hacking？**
 

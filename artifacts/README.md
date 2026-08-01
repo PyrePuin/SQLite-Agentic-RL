@@ -16,4 +16,5 @@
 
 正式 Slime/Megatron RL checkpoint 约为 41 GiB，因此不包含在仓库中。
 可复现配置和验证曲线见
-[`docs/RL设计与结果.md`](../docs/RL设计与结果.md)。
+[`docs/技术设计/RL与奖励设计.md`](../docs/技术设计/RL与奖励设计.md) 与
+[`results/rl/stage2.validation.jsonl`](../results/rl/stage2.validation.jsonl)。

@@ -142,7 +142,7 @@ Teacher-forcing loss 只衡量“给定正确历史时能否预测下一个 toke
 | `parse_failed` | 是否无法解析 action/final |
 | `budget_exceeded` | 是否用完步数仍未结束 |
 
-三档 dev 评测控制成本：mini 110、fast 120、full 300。最终选择的 `checkpoint-600` 在 full-dev 上得到：
+三档 dev 评测控制成本：mini 110、fast 120、full 300。现有正式记录中，最终选择的 `checkpoint-600` 在 full-dev 上得到：
 
 | 指标 | 结果 |
 |---|---:|
@@ -154,7 +154,7 @@ Teacher-forcing loss 只衡量“给定正确历史时能否预测下一个 toke
 | parse failed | 2.67% |
 | budget exceeded | 3.00% |
 
-这里 strict 与 equivalent 差距较大，部分原因是列别名不同但值完全一致。项目把 equivalent 作为语义正确主口径，同时保留 strict 用于观察输出规范性。
+这里 strict 与 equivalent 差距较大，部分原因是列别名不同但值完全一致。项目把 equivalent 作为语义正确主口径，同时保留 strict 用于观察输出规范性。结构化摘要见 [`results/sft/checkpoint600.summary.json`](../../results/sft/checkpoint600.summary.json)。该摘要由现有正式记录转录，仓库没有逐任务原始 rollout；同时，历史 SFT 数据来源使这组数字不能单独证明严格未见 schema 泛化。
 
 ## 9. SFT 后模型还错在哪里
 
@@ -196,7 +196,7 @@ python sqlite_agent/scripts/sft/run_formal_sft_eval.py \
 
 ### 一分钟版本
 
-> SFT 的目标是给 Agentic RL 提供稳定冷启动，而不是在监督阶段解决所有 SQL 问题。我们用 Qwen2.5-Coder-3B-Instruct 做 LoRA，正式数据 5,817 条，但包含 21,688 个 assistant 监督位置，分别覆盖 SQL core、协议、schema 动作、多轮轨迹、真实 repair 和 verifier 成功的 Teacher 轨迹。训练用 rank 32、alpha 64、bf16、长度 2048、有效 batch 16、2 epochs、学习率 1e-4。checkpoint 不按 loss 选，而是每 100 step 跑真实 Agent 评测，最终 checkpoint-600 在 300 条 full-dev 上达到 94.3% 可执行率和 66.3% strict-or-equivalent。此时剩余错误主要是可执行但语义错误，适合交给 RL 优化。
+> SFT 的目标是给 Agentic RL 提供稳定冷启动，而不是在监督阶段解决所有 SQL 问题。我们用 Qwen2.5-Coder-3B-Instruct 做 LoRA，正式数据 5,817 条，但包含 21,688 个 assistant 监督位置，分别覆盖 SQL core、协议、schema 动作、多轮轨迹、真实 repair 和 verifier 成功的 Teacher 轨迹。训练用 rank 32、alpha 64、bf16、长度 2048、有效 batch 16、2 epochs、学习率 1e-4。checkpoint 不按 loss 选，而是按真实 Agent 评测选择；现有记录中 checkpoint-600 在 300 条 full-dev 上达到 94.3% 可执行率和 66.3% strict-or-equivalent。这个结果用于说明固定流程下的能力，不夸大为严格未见 schema 泛化。
 
 ### 常见追问
 

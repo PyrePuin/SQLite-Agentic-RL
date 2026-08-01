@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "source_type": "documented_metric_transcription",
+  "raw_export_available": false,
+  "collected_on": "2026-08-01",
+  "model": "Qwen2.5-Coder-3B-Instruct",
+  "adapter": "qwen25-coder3b-sqlite-sft-v3-checkpoint600-lora",
+  "checkpoint_step": 600,
+  "evaluation": {
+    "task_file": "data/eval/full_dev.jsonl",
+    "tasks": 300,
+    "max_tool_steps": 8,
+    "protocol": "json_v2"
+  },
+  "metrics": {
+    "strict_or_equiv_pass": 0.6633,
+    "strict_pass": 0.44,
+    "canonical_protocol_valid_rate": 0.9033,
+    "finalization_rate": 0.9433,
+    "sql_executable_rate": 0.9433,
+    "parse_failed_rate": 0.0267,
+    "budget_exceeded_rate": 0.03
+  },
+  "wandb": {
+    "entity": "puin719703329-ustc",
+    "project": "sqlite-agentic-rl-v2",
+    "run_id": "4557721e2cd4",
+    "run_name": "sft_v3_real_json_coder3b_formal_20260706",
+    "run_url": "https://wandb.ai/puin719703329-ustc/sqlite-agentic-rl-v2/runs/4557721e2cd4",
+    "project_private_when_checked": true
+  },
+  "limitations": [
+    "该文件由现有正式文档数值转录，不是评测程序或 W&B API 的原始导出。",
+    "仓库当前不含逐任务 checkpoint-600 rollout，不能从本文件独立重算聚合指标。",
+    "该结果不单独证明严格未见 schema 泛化。"
+  ]
+}

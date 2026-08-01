@@ -1,4 +1,4 @@
-# Agent Runtime 模块面试学习笔记
+# Agent 运行时模块面试学习笔记
 
 Agent Runtime 是模型与 SQLite 环境之间的控制层。它把“模型生成文本”变成可执行动作，把数据库结果变成下一轮 observation，并决定何时结束、如何记录错误、最终用哪条 SQL 评分。
 
@@ -204,9 +204,11 @@ Slime 版本必须区分可训练 token 与环境 token：assistant action 为 `
 | SQL 可执行但结果错误 | Runtime 本身不知道语义错 | final verifier 与 Gold Result 比较 |
 | 危险 SQL | guard 拒绝，数据库仍只读 | reward 直接 `-1` |
 | 超出步数 | 结束轨迹，`budget_exceeded=true` | 负奖励并计入评测 |
-| final 与最后成功 SQL 不同 | 仍验证提交的 final | 降低奖励并记录 mismatch |
+| final 与最后成功 SQL 不同 | 仍重新执行并验证提交的 final | 正确项封顶 0.80，再扣 0.05；记录 mismatch |
 
 这里最重要的区分是：SQLite 能发现“执行错误”，但不能单独发现“执行成功、语义错误”。后者必须由 verifier 使用 Gold Result 判断。
+
+`final mismatch` 不是“最终答案一定错”。它只表示模型最后提交的 SQL，和轨迹中最后一次成功执行的 SQL 不同。例如执行 A 后提交 B，或者没成功执行任何 SQL 就直接提交 B。verifier 只按 B 的完整执行结果判断正确性：B 正确但 mismatch 时是 `min(1.0, 0.80) - 0.05 = 0.75`；B 可执行但错误时是 `0.20 - 0.05 = 0.15`。这个信号约束的是“先执行确认，再原样提交”的行为一致性，不会拿 A 的正确性替 B 得分。
 
 ## 11. Runtime 与训练的关系
 

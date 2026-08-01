@@ -9,8 +9,9 @@
 | `test_data_builders.py` | 验证英文困难 mini 评测集的默认构造参数、输出规模和 manifest 行为 |
 | `test_json_protocol.py` | 验证 `json_v2` 工具调用与最终回答的解析，并确认正式协议拒绝 XML 格式 |
 | `test_relativize_paths.py` | 验证本地和远程绝对路径可以转换为项目相对路径，并能正确解析数据库路径 |
-| `test_reward.py` | 验证结果等价、可执行但错误以及不安全 SQL 对应的 reward 和指标 |
+| `test_reward.py` | 验证结果等价、可执行但错误、final mismatch 以及不安全 SQL 对应的 reward 和指标 |
 | `test_script_entrypoints.py` | 验证数据处理脚本能从仓库根目录正常启动 |
+| `test_sqlite_tools.py` | 验证 SQL 执行结果按列位置读取，重复列名不会覆盖真实值 |
 | `test_teacher_rollout_conversion.py` | 验证 331 条成功 Teacher rollout 可以精确重建正式 SFT 中的对应样本 |
 
 ## 使用方式
@@ -41,4 +42,4 @@ pytest -q tests/test_reward.py
 pytest -q tests/test_reward.py::test_unsafe_sql_is_rejected
 ```
 
-当前完整测试集包含 16 个测试用例。
+当前完整测试集包含 18 个测试用例。

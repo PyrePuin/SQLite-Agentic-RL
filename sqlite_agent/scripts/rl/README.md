@@ -295,4 +295,4 @@ test -f checkpoints/slime_rl_stage2/latest_checkpointed_iteration.txt
 - Megatron logprob/entropy OOM：单独降低 rollout batch 未必有效，应检查 actor/rollout GPU 隔离、TP、activation recompute 和 optimizer offload；
 - 自定义 hook 参数不存在：Slime 版本与本项目启动脚本不兼容。
 
-奖励公式、GRPO 和 reward hacking 分析见 [`../../../docs/RL模块面试学习笔记.md`](../../../docs/RL模块面试学习笔记.md)。
+奖励公式、GRPO 和 reward hacking 分析见 [`../../../docs/面试笔记/RL模块.md`](../../../docs/面试笔记/RL模块.md)。

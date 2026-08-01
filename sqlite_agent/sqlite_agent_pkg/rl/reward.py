@@ -26,9 +26,8 @@ def compute_sqlite_agent_reward(
 ) -> tuple[float, dict[str, Any]]:
     """Reward for V2 JSON-protocol SQLite agent rollouts.
 
-    The reward is intentionally simple for the first RL smoke: correctness is the
-    dominant term, while protocol/finalization failures are penalized enough to
-    catch regressions from the SFT policy.
+    Correctness is the dominant term; protocol and finalization penalties keep
+    the online policy aligned with the runtime contract.
     """
 
     metrics: dict[str, Any] = {

@@ -51,6 +51,22 @@ def test_executable_wrong_query_receives_partial_reward(tmp_path: Path) -> None:
     assert metrics["equivalent_output"] is False
 
 
+def test_correct_final_with_mismatch_receives_capped_reward(tmp_path: Path) -> None:
+    db_path = tmp_path / "fixture.sqlite"
+    make_db(db_path)
+
+    reward, metrics = compute_sqlite_agent_reward(
+        db_path=db_path,
+        gold_sql="SELECT SUM(value) FROM numbers",
+        final_sql="SELECT 1 + 2 + 3",
+        final_matches_last_execute=False,
+    )
+
+    assert reward == 0.75
+    assert metrics["equivalent_output"] is True
+    assert metrics["final_matches_last_execute"] is False
+
+
 def test_unsafe_sql_is_rejected(tmp_path: Path) -> None:
     db_path = tmp_path / "fixture.sqlite"
     make_db(db_path)
