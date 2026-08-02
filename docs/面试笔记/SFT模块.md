@@ -26,7 +26,7 @@ SFT 在本项目中的任务不是把 3B 模型直接训练到最终最优，而
 | `schema_only` | 714 | 识别相关表和字段，选择 schema 工具 |
 | `protocol_anchor` | 500 | 输出唯一 canonical JSON 对象 |
 | `agent_trace` | 876 | 多轮 action—observation—action |
-| `repair_real` | 251 | 从真实执行错误恢复 |
+| `repair_real` | 251 | 历史 Repair 来源；其中 142 条明确含失败反馈 |
 | `teacher_agent` | 2,045 | Teacher 工具行为蒸馏 |
 | `teacher_agent_real_v3` | 331 | 新采集且经 verifier 验证的真实轨迹 |
 
@@ -58,9 +58,16 @@ assistant: 下一次 tool_call / final JSON
 {"type":"tool_call","name":"get_schema","arguments":{"table_names":["orders"]}}
 ```
 
-这类 repair 监督的是条件行为：看到具体错误 observation 后如何改变下一步动作，而不是只监督最终正确 SQL。
+这类 Repair 主要监督的是条件行为：看到具体错误 observation 后如何改变下一步动作，而不是训练一个独立的“结果判错器”。
 
-`sql_core` 采用独立的 direct-SQL system prompt，assistant 直接输出 SQL 字符串。它的作用是避免多轮协议训练稀释基础 SQL 能力，并不是正式 Agent runtime 的输出格式。
+这里要区分两种 `ok=false`：
+
+- SQL 语法错误、缺表、缺列等执行错误由 SQLite 直接返回，模型能从真实 runtime observation 中看到；
+- `wrong_result` 表示 SQL 可以执行但结果与 Gold Result 不等价，它必须由离线 verifier 对比后注入，模型本身没有 Gold，无法独立确认结果错误。
+
+因此，`wrong_result` 对模型来说首先是一个外部反馈信号。SFT 通过包含“反馈 → 修改 SQL”转移的样本，让模型学习这个信号意味着应该继续检查 Schema、结果列或 SQL 逻辑，而不是马上 `final`。但如果推理时没有 Gold verifier、用户反馈或其他外部检查，模型仍可能提交一条可执行但语义错误的 SQL。
+
+当前正式数据中的 `sql_core` 将 Schema 与问题放进 User context，Assistant 输出 JSON `final`，不经过工具循环。它的作用是避免多轮协议训练稀释基础 SQL 能力；判断已训练数据形态时应以正式 JSONL 为准。
 
 ## 4. 从失败的协议训练得到什么
 
@@ -113,20 +120,7 @@ LoRA rank 32 / alpha 64 提供足够容量学习协议与工具行为，同时�
 
 最大长度 2,048 是成本与轨迹完整性的折中。正式训练前使用 `inspect_sft_token_lengths.py` 检查长度分布，构造阶段已经去掉 14 条异常长样本，避免大量截断破坏 action—observation 对齐。
 
-## 7. 为什么训练器要保留同一条 step 轴
-
-正式编排器 `run_formal_sft_eval.py` 不会把每 100 step 当成全新的短训练。它始终把最终训练长度传给 `--max-steps`，通过 `--stop-at-step` 暂停、评测，再从完整 Trainer checkpoint 恢复。
-
-这样保留：
-
-- optimizer state；
-- cosine scheduler 的全局进度；
-- gradient scaler / RNG 等 Trainer 状态；
-- 统一的 global step 与 W&B 指标轴。
-
-如果每段都把 `max_steps` 改成下一个边界或只加载 adapter 权重，学习率曲线可能被重置，得到的就不是一次连续训练。
-
-## 8. 为什么不能只看 loss
+## 7. 为什么不能只看 loss
 
 Teacher-forcing loss 只衡量“给定正确历史时能否预测下一个 token”。真实 Agent 还会遇到自身生成造成的状态分布偏移：一个错误 action 会带来不同 observation，并影响所有后续轮次。
 
@@ -156,7 +150,7 @@ Teacher-forcing loss 只衡量“给定正确历史时能否预测下一个 toke
 
 这里 strict 与 equivalent 差距较大，部分原因是列别名不同但值完全一致。项目把 equivalent 作为语义正确主口径，同时保留 strict 用于观察输出规范性。结构化摘要见 [`results/sft/checkpoint600.summary.json`](../../results/sft/checkpoint600.summary.json)。该摘要由现有正式记录转录，仓库没有逐任务原始 rollout；同时，历史 SFT 数据来源使这组数字不能单独证明严格未见 schema 泛化。
 
-## 9. SFT 后模型还错在哪里
+## 8. SFT 后模型还错在哪里
 
 SFT 后协议和可执行性已经较高，主要错误从“根本跑不起来”转为“SQL 能执行但结果错误”：
 
@@ -168,7 +162,7 @@ SFT 后协议和可执行性已经较高，主要错误从“根本跑不起来�
 
 这正是进入 RL 的条件：奖励能够区分正确、可执行但错误、不可执行、协议失败，而不再被大量格式噪声淹没。
 
-## 10. 如何复现训练与评测
+## 9. 如何复现训练与评测
 
 ```bash
 export PYTHONPATH="$PWD/sqlite_agent:${PYTHONPATH:-}"
@@ -192,7 +186,7 @@ python sqlite_agent/scripts/sft/run_formal_sft_eval.py \
 
 单独评测必须明确基座、adapter 和任务集，不能只拿 adapter 目录直接生成。
 
-## 11. 面试表达
+## 10. 面试表达
 
 ### 一分钟版本
 
@@ -211,3 +205,7 @@ loss 和 Agent 成功率不严格单调，后期还可能过拟合协议模板�
 **这是不是蒸馏？**
 
 331 条真实 Teacher 轨迹属于行为蒸馏，但完整 SFT 不只是蒸馏，还包含确定性 SQL core、协议锚点、已有轨迹和真实 repair。
+
+**模型真的“理解” `wrong_result` 吗？**
+
+它没有 Gold Result，不能独立证明结果错误。`wrong_result` 是外部 verifier 注入的反馈；Repair SFT 主要训练模型在收到该反馈后如何修改 SQL，而不是训练模型自己充当结果判定器。
