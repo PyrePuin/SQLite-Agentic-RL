@@ -161,11 +161,20 @@ R = R_outcome + P_parse + P_budget + P_protocol
 
 ## 8. GRPO 如何使用这些奖励
 
-同一 prompt 采样 group size 4。简化理解，先在组内标准化 reward：
+同一 prompt 采样 group size 4。简化理解，先计算组内奖励均值与标准差：
 
 ```math
-A_i = \frac{R_i - \operatorname{mean}(R_1,\dots,R_4)}
-{\operatorname{std}(R_1,\dots,R_4)+\epsilon}
+\bar{R} = \frac{1}{4}\sum_{j=1}^{4}R_j
+```
+
+```math
+s_R = \sqrt{\frac{1}{4}\sum_{j=1}^{4}(R_j-\bar{R})^2}
+```
+
+再将每条轨迹的奖励转换为组内相对优势：
+
+```math
+A_i = \frac{R_i-\bar{R}}{s_R+\epsilon}
 ```
 
 高于同组平均的轨迹获得正优势，低于平均的获得负优势。策略更新使用 PPO 风格 clipped objective，并加入与参考策略的 KL 约束。
