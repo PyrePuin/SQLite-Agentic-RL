@@ -127,7 +127,7 @@ data/sft/v3_real_json/sft_v3_real_json_5817.jsonl
 | `agent_trace` | 876 | 多轮工具使用行为 |
 | `schema_only` | 714 | schema 理解与动作选择 |
 | `protocol_anchor` | 500 | 固定标准 JSON 输出协议 |
-| `repair_real` | 251 | 来自真实执行失败的修复过程 |
+| `repair_real` | 251 | 历史 Repair 来源；其中 142 条明确包含失败反馈 |
 | `teacher_agent_real_v3` | 331 | DeepSeek V4 Pro 真实环境成功轨迹 |
 
 全部模型监督目标已统一为 `json_v2`：
@@ -296,6 +296,7 @@ SQLite-Agentic-RL/
 ├── results/                    # 可提交的 SFT / RL 结构化结果摘要
 └── docs/
     ├── 技术设计/               # 系统事实、实现与证据边界
+    ├── 项目演进/               # 关键技术路线和数据版本演进
     └── 面试笔记/               # 面试讲述与常见追问
 ```
 
@@ -469,9 +470,10 @@ bash sqlite_agent/scripts/rl/run_slime_rl_smoke.sh
 
 ## 文档
 
-[`docs/README.md`](docs/README.md) 将公开文档分成两组：
+[`docs/README.md`](docs/README.md) 将公开文档分成三组：
 
 - `docs/技术设计/`：数据管线、SFT、Agent 运行时、RL 奖励与评测边界；
+- `docs/项目演进/`：记录从 V1 到当前版本的关键技术路线；其中 [SFT 数据演进](docs/项目演进/SFT数据演进.md) 说明自动轨迹、Teacher、Repair、JSON V2 和最终 5,817 条数据；
 - `docs/面试笔记/`：数据、SFT、Runtime、RL 四个模块的讲述和常见追问。
 
 代码目录的文件职责和使用方式见 [`sqlite_agent/README.md`](sqlite_agent/README.md)，实验结果入口见 [`results/README.md`](results/README.md)。
